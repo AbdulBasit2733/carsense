@@ -4,9 +4,14 @@ import React from "react";
 import { Button } from "./ui/button";
 import { ArrowLeft, CarFront, Heart, Layout } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { checkUser } from "@/lib/checkUser";
+import { log } from "console";
 
-const Header = async ({ isAdminPage = false }) => {
-  const isAdmin = false;
+const Header = async ({ isAdminPage }: { isAdminPage: boolean }) => {
+  const user = await checkUser();
+  log("user", user);
+  const isAdmin = user?.role === "ADMIN";
+
   return (
     <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b">
       <nav className="mx-auto px-4 py-4 flex items-center justify-between">
@@ -61,11 +66,13 @@ const Header = async ({ isAdminPage = false }) => {
             </SignInButton>
           </SignedOut>
           <SignedIn>
-            <UserButton appearance={{
-              elements:{
-                avatarBox:"w-10 h-10"
-              }
-            }} />
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "w-10 h-10",
+                },
+              }}
+            />
           </SignedIn>
         </div>
       </nav>
