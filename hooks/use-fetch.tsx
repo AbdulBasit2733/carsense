@@ -1,9 +1,7 @@
-import { fail } from "assert";
-import { set } from "date-fns";
 import { useState } from "react";
 import { toast } from "sonner";
 
-const useFetch = (cb) => {
+const useFetch = (cb: Function) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -12,9 +10,14 @@ const useFetch = (cb) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await cb(...args);
-      setData(response.data);
-      setError(null);
+      const response = await cb(...args); // Assuming `cb` returns { success, data } or { success, error }
+      
+      if (response.success) {
+        setData(response.data); // Store the data if success is true
+      } else {
+        setError(response.error); // Handle the error if success is false
+        toast.error(response.error || "Something went wrong");
+      }
     } catch (error: any) {
       console.log(error);
       setError(error);
@@ -23,6 +26,7 @@ const useFetch = (cb) => {
       setLoading(false);
     }
   };
+
   return { data, loading, error, fn, setData };
 };
 
