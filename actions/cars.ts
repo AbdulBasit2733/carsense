@@ -119,7 +119,7 @@ export async function processCarImageWithAI(file) {
   }
 }
 
-export async function addCar({ carData, images }) {
+export async function addCar({ carData, images }): Promise<Result> {
   try {
     const { userId } = await auth();
     if (!userId) {

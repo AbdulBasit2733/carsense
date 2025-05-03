@@ -106,7 +106,7 @@ const AddCarForm = () => {
   } = useFetch(addCar);
 
   useEffect(() => {
-    if (addCarResult) {
+    if (addCarResult?.success && !addCarLoading) {
       toast.success("Car added successfully");
       router.push("/admin/cars");
     }
@@ -117,7 +117,7 @@ const AddCarForm = () => {
       setImageError("At least one image is required");
       return;
     }
-    console.log(data, uploadedImages);
+    // console.log(data, uploadedImages);
     const carData = {
       ...data,
       year: parseInt(data.year),
