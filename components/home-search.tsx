@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Input } from "./ui/input";
-import { Camera, Upload } from "lucide-react";
+import { Camera, Search, Upload } from "lucide-react";
 import { Button } from "./ui/button";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
@@ -50,7 +50,7 @@ const HomeSearch = () => {
     }
   };
 
-  const handleTextSubmit = (e) => {
+  const handleTextSearch = (e) => {
     e.preventDefault();
     if (!searchTerm.trim()) {
       toast.error("Please enter a search term");
@@ -99,23 +99,34 @@ const HomeSearch = () => {
 
   return (
     <div>
-      <form>
+      <form onSubmit={handleTextSearch}>
         <div className="relative flex items-center">
-          <Input className="pl-10 pr-12 py-6 w-full rounded-full border-gray-300 bg-white/95 backdrop-blur-sm" />
-        </div>
-        <div className="absolute right-[100px] ">
-          <Camera
-            className=" cursor-pointer rounded-xl p-1.5"
-            onClick={() => setIsImageSearchActive(!isImageSearchActive)}
-            style={{
-              background: isImageSearchActive ? "black" : "",
-              color: isImageSearchActive ? "white" : "",
-            }}
+          <Search className="absolute left-3 w-5 h-5" />
+          <Input
+            type="text"
+            placeholder="Enter make, model, or use our AI Image Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 pr-12 py-6 w-full rounded-full border-gray-300 bg-white/95 backdrop-blur-sm"
           />
+
+          {/* Image Search Button */}
+          <div className="absolute right-[100px]">
+            <Camera
+              size={35}
+              onClick={() => setIsImageSearchActive(!isImageSearchActive)}
+              className="cursor-pointer rounded-xl p-1.5"
+              style={{
+                background: isImageSearchActive ? "black" : "",
+                color: isImageSearchActive ? "white" : "",
+              }}
+            />
+          </div>
+
+          <Button type="submit" className="absolute right-2 rounded-full">
+            Search
+          </Button>
         </div>
-        <Button type="submit" className="absolute right-2 rounded-full">
-          Search
-        </Button>
       </form>
       {isImageSearchActive && (
         <div className="mt-4">
