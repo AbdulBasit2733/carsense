@@ -48,7 +48,7 @@ const CarCard = ({ car }: { car: Car }) => {
           <h3 className="text-lg font-bold line-clamp-1 ">
             {car.make} {car.model}
           </h3>
-          <span className="text-xl font-bold text-blue-600">${car.price}</span>
+          <span className="text-xl font-bold text-blue-600">Rs {car.price}</span>
         </div>
         <div className=" text-gray-600 mb-2 flex items-center">
           <span>{car.year}</span>

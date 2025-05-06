@@ -1,4 +1,5 @@
 import React from 'react'
+import SettingsForm from './components/settings-form'
 
 export const metaData  = {
     title:" Settings | Carsense Admin",
@@ -7,9 +8,9 @@ export const metaData  = {
 
 const SettingsPage = () => {
   return (
-    <div className='p-6'>
+    <div className='p-6 w-full'>
         <h1 className='text-2xl font-black mb-6'>Settings</h1>
-        
+        <SettingsForm />
     </div>
   )
 }
