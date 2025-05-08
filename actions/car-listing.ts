@@ -1,7 +1,8 @@
+"use server";
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-
+import { serializedCarData } from "../lib/helper";
 export async function getCarFilters() {
   try {
     const makes = await db.car.findMany({
@@ -107,11 +108,13 @@ export async function getCars({
       status: "AVAILABLE",
     };
 
-    if (search) {
+    const safeSearch = typeof search === "string" ? search.trim() : "";
+
+    if (safeSearch) {
       where.OR = [
-        { make: { contains: search, mode: "insensitive" } },
-        { model: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
+        { make: { contains: safeSearch, mode: "insensitive" } },
+        { model: { contains: safeSearch, mode: "insensitive" } },
+        { description: { contains: safeSearch, mode: "insensitive" } },
       ];
     }
 
@@ -170,8 +173,9 @@ export async function getCars({
     }
 
     const serializedCars = cars.map((car) =>
-      serializedCars(car, wishlisted.has(car.id))
+      serializedCarData(car, wishlisted.has(car.id))
     );
+
     return {
       success: true,
       data: serializedCars,
@@ -205,58 +209,57 @@ export async function toggleSavedCars(carId) {
     }
 
     const car = await db.car.findUnique({
-        where:{
-            id:carId
-        }
-    })
-    if(!car) {
-        return {
-            success:false,
-            message:"Car not found"
-        }
+      where: {
+        id: carId,
+      },
+    });
+    if (!car) {
+      return {
+        success: false,
+        message: "Car not found",
+      };
     }
 
     const existingSave = await db.userSavedCars.findUnique({
-        where:{
-            userId_carId:{
-                userId:user.id,
-                carId:carId
-            }
-        }
-    })
+      where: {
+        userId_carId: {
+          userId: user.id,
+          carId: carId,
+        },
+      },
+    });
 
-    if(existingSave) {
-        await db.userSavedCars.delete({
-            where:{
-                userId_carId:{
-                    userId:user.id,
-                    carId
-                }
-            }
-        })
-        revalidatePath('/saved-cars');
-        return {
-            success:true,
-            saved:false,
-            message:"Car removed from favourites"
-        }
+    if (existingSave) {
+      await db.userSavedCars.delete({
+        where: {
+          userId_carId: {
+            userId: user.id,
+            carId,
+          },
+        },
+      });
+      revalidatePath("/saved-cars");
+      return {
+        success: true,
+        saved: false,
+        message: "Car removed from favourites",
+      };
     }
 
     await db.userSavedCars.create({
-        data:{
-            userId:user.id,
-            carId
-        }
-    })
+      data: {
+        userId: user.id,
+        carId,
+      },
+    });
 
-    revalidatePath('/saved-cars');
+    revalidatePath("/saved-cars");
     return {
-        success:true,
-        saved:true,
-        message:"Car Added to favourites"
-    }
-
+      success: true,
+      saved: true,
+      message: "Car Added to favourites",
+    };
   } catch (error) {
-    throw new Error("Error toggling saved car:" + error.message)
+    throw new Error("Error toggling saved car:" + error.message);
   }
 }

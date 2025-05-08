@@ -8,14 +8,14 @@ const useFetch = (cb: Function) => {
 
   const fn = async (...args: unknown[]) => {
     setLoading(true);
-    setError(null);
+    setError(null); 
     try {
       const response = await cb(...args); // Assuming `cb` returns { success, data } or { success, error }
-      
+      // console.log("usefetch response", response);
       if (response.success) {
-        setData(response.data); // Store the data if success is true
+        setData(response); // Store the data if success is true
       } else {
-        setError(response.error); // Handle the error if success is false
+        setError(response); // Handle the error if success is false
         toast.error(response.error || "Something went wrong");
       }
     } catch (error: any) {
