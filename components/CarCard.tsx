@@ -1,18 +1,51 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "./ui/card";
 import Image from "next/image";
-import { CarIcon, Heart } from "lucide-react";
+import { CarIcon, Heart, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Car } from "@/lib/data";
 import { Badge } from "./ui/badge";
 import { useRouter } from "next/navigation";
+import useFetch from "@/hooks/use-fetch";
+import { toggleSavedCars } from "@/actions/car-listing";
+import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 const CarCard = ({ car }: { car: Car }) => {
   const [isSaved, setSaved] = useState(car.wishlisted);
   const router = useRouter();
-  const handleToggleSaved = () => {};
+  const { isSignedIn } = useAuth();
+
+  const {
+    loading: isToggling,
+    fn: toggleSavedCarFn,
+    data: toggleResult,
+    error: toggleError,
+  } = useFetch(toggleSavedCars);
+
+  console.log( "toggleResult",toggleResult);
+  
+
+  const handleToggleSaved = async (e) => {
+    e.preventDefault();
+    if (!isSignedIn) {
+      toast.error("Please signin to save cars");
+      router.push("/sign-in");
+      return;
+    }
+
+    if (isToggling) return;
+
+    await toggleSavedCarFn(car.id);
+  };
+  useEffect(() => {
+    if (toggleResult?.success && toggleResult?.saved !== isSaved) {
+      setSaved(toggleResult?.saved);
+      toast.success(toggleResult?.message);
+    }
+  }, [toggleResult, isSaved]);
   return (
     <Card className="overflow-hidden hover:shadow-lg transition group py-0">
       <div className="relative h-48">
@@ -40,7 +73,11 @@ const CarCard = ({ car }: { car: Car }) => {
               : "text-gray-600 hover:text-gray-900"
           }`}
         >
-          <Heart className={isSaved ? "fill-current" : ""} size={24} />
+          {isToggling ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Heart className={isSaved ? "fill-current" : ""} size={24} />
+          )}
         </Button>
       </div>
       <CardContent className="p-4">
@@ -48,7 +85,9 @@ const CarCard = ({ car }: { car: Car }) => {
           <h3 className="text-lg font-bold line-clamp-1 ">
             {car.make} {car.model}
           </h3>
-          <span className="text-xl font-bold text-blue-600">Rs {car.price}</span>
+          <span className="text-xl font-bold text-blue-600">
+            Rs {car.price}
+          </span>
         </div>
         <div className=" text-gray-600 mb-2 flex items-center">
           <span>{car.year}</span>
@@ -69,7 +108,12 @@ const CarCard = ({ car }: { car: Car }) => {
           </Badge>
         </div>
         <div className="flex justify-between">
-          <Button onClick={() => router.push(`/cars/${car.id}`)} className=" flex-1">View Car</Button>
+          <Button
+            onClick={() => router.push(`/cars/${car.id}`)}
+            className=" flex-1"
+          >
+            View Car
+          </Button>
         </div>
       </CardContent>
     </Card>

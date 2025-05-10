@@ -3,6 +3,7 @@ import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { serializedCarData } from "../lib/helper";
+import { error } from "console";
 export async function getCarFilters() {
   try {
     const makes = await db.car.findMany({
@@ -261,5 +262,140 @@ export async function toggleSavedCars(carId) {
     };
   } catch (error) {
     throw new Error("Error toggling saved car:" + error.message);
+  }
+}
+
+export async function getSavedCars() {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return {
+        success: false,
+        error: "Unauthorized",
+      };
+    }
+    const user = await db.user.findUnique({
+      where: {
+        clerkUserId: userId,
+      },
+    });
+    if (!user) {
+      return {
+        success: false,
+        error: "User not found",
+      };
+    }
+
+    const savedCars = await db.userSavedCars.findMany({
+      where: {
+        userId: user.id,
+      },
+      include: {
+        car: true,
+      },
+      orderBy: {
+        savedAt: "desc",
+      },
+    });
+    const cars = savedCars.map((saved) => serializedCarData(saved.car));
+
+    return {
+      success: true,
+      data: cars,
+    };
+  } catch (error) {
+    console.log("Error fetching saved cars", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+}
+
+export async function getCarById(carId) {
+  try {
+    const { userId } = await auth();
+    let dbUser = null;
+
+    if (userId) {
+      dbUser = await db.user.findUnique({
+        where: {
+          clerkUserId: userId,
+        },
+      });
+    }
+    const car = await db.car.findUnique({
+      where:{
+        id:carId
+      }
+    })
+
+    if(!car) {
+      return {
+        success:false,
+        error:"Car not found !"
+      }
+    }
+    let isWhishlisted = false;
+    if(dbUser) {
+      const savedCar = await db.userSavedCars.findUnique({
+        where:{
+          userId_carId:{
+            userId:dbUser.id,
+            carId
+          }
+        }
+        
+      })
+      isWhishlisted = !!savedCar 
+    }
+    const existingTestDrive = await db.testDriveBooking.findFirst({
+      where:{
+        carId,
+        userId:dbUser?.id,
+        status:{in:['PENDING', 'CONFIRMED', 'COMPLETED']}
+      },
+      orderBy:{
+        createdAt:"asc"
+      }
+    })
+    let userTestDrive = null
+
+
+    if(existingTestDrive){
+      userTestDrive = {
+        id:existingTestDrive.id,
+        status:existingTestDrive.status,
+        bookingDate:existingTestDrive.bookingDate.toString()
+      }
+    }
+    const dealership = await db.dealerShipInfo.findFirst({
+      include:{
+        workingHours:true
+      }
+    })
+
+    return {
+      success:true,
+      data:{
+        ...serializedCarData(car,isWhishlisted),
+        testDriveInfo:{
+          userTestDrive,
+          dealership:dealership ? {
+            ...dealership,
+            createdAt:dealership.createdAt.toISOString(),
+            updatedAt:dealership.updatedAt.toISOString(),
+            workingHours:dealership.workingHours.map((hour) => ({
+              ...hour,
+              createdAt:hour.createdAt.toISOString(),
+              updatedAt:hour.updatedAt.toISOString()
+            }))
+          } : null
+        }
+      }
+    }
+
+  } catch (error) {
+    throw new Error ("Error fetching car details:" + error?.message)
   }
 }
