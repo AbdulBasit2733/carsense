@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import useFetch from "@/hooks/use-fetch";
 import {
-  getDealerShipInfo,
+  getDealershipInfo,
   getUsers,
   saveWorkingHours,
   updateUserRole,
@@ -75,7 +75,7 @@ const SettingsForm = () => {
     fn: fetchDealershipInfo,
     data: settingsData,
     error: settingsError,
-  } = useFetch(getDealerShipInfo);
+  } = useFetch(getDealershipInfo);
 
   const handleRemoveAdmin = async (user) => {
     if (
@@ -113,6 +113,8 @@ const SettingsForm = () => {
     data: usersData,
     error: usersError,
   } = useFetch(getUsers);
+  // console.log(usersData);
+  
   const {
     loading: updatingRole,
     fn: updateRole,
@@ -137,15 +139,14 @@ const SettingsForm = () => {
   const handleSaveHours = async () => {
     await saveHours(workingHours);
   };
-  const filteredUser = usersData
-    ? usersData?.filter(
+  const filteredUser = usersData && usersData?.data
+    ? usersData?.data?.filter(
         (user) =>
           user.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
           user.email.toLowerCase().includes(userSearch.toLowerCase())
       )
     : [];
 
-  console.log("users Data", usersData);
   useEffect(() => {
     if (saveResult) {
       toast.success("Working Hours sved successfully");
@@ -334,7 +335,7 @@ const SettingsForm = () => {
                 <div className="py-12 flex justify-center">
                   <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                 </div>
-              ) : usersData && filteredUser.length > 0 ? (
+              ) : usersData && usersData?.data && filteredUser.length > 0 ? (
                 <>
                   <Table>
                     <TableHeader>
