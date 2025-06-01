@@ -40,12 +40,18 @@ const CarCard = ({ car }: { car: Car }) => {
 
     await toggleSavedCarFn(car.id);
   };
+
   useEffect(() => {
     if (toggleResult?.success && toggleResult?.saved !== isSaved) {
       setSaved(toggleResult?.saved);
       toast.success(toggleResult?.message);
     }
   }, [toggleResult, isSaved]);
+  useEffect(() => {
+    if(toggleError){
+      toast.error("Failed to update favourites")
+    }
+  },[toggleError])
   return (
     <Card className="overflow-hidden hover:shadow-lg transition group py-0">
       <div className="relative h-48">

@@ -4,25 +4,27 @@ import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
-export async function getDealerShipInfo() {
+export async function getDealershipInfo() {
   try {
     const { userId } = await auth();
-    if (!userId) return { success: false, error: "User not authenticated" };
+    if (!userId) throw new Error("Unauthorized");
 
-    const user = await db.user.findUnique({
-      where: { id: userId },
-    });
-    if (!user) return { success: false, error: "User not found" };
-
+    // Get the dealership record
     let dealership = await db.dealerShipInfo.findFirst({
       include: {
-        workingHours: { orderBy: { dayOfWeek: "asc" } },
+        workingHours: {
+          orderBy: {
+            dayOfWeek: "asc",
+          },
+        },
       },
     });
 
+    // If no dealership exists, create a default one
     if (!dealership) {
       dealership = await db.dealerShipInfo.create({
         data: {
+          // Default values will be used from schema
           workingHours: {
             create: [
               {
@@ -57,25 +59,30 @@ export async function getDealerShipInfo() {
               },
               {
                 dayOfWeek: "SATURDAY",
-                openTime: "09:00",
-                closeTime: "18:00",
-                isOpen: false,
+                openTime: "10:00",
+                closeTime: "16:00",
+                isOpen: true,
               },
               {
                 dayOfWeek: "SUNDAY",
-                openTime: "09:00",
-                closeTime: "18:00",
+                openTime: "10:00",
+                closeTime: "16:00",
                 isOpen: false,
               },
             ],
           },
         },
         include: {
-          workingHours: { orderBy: { dayOfWeek: "asc" } },
+          workingHours: {
+            orderBy: {
+              dayOfWeek: "asc",
+            },
+          },
         },
       });
     }
 
+    // Format the data
     return {
       success: true,
       data: {
@@ -84,12 +91,8 @@ export async function getDealerShipInfo() {
         updatedAt: dealership.updatedAt.toISOString(),
       },
     };
-  } catch (error: any) {
-    console.error(error);
-    return {
-      success: false,
-      error: "Error fetching dealership info: " + error.message,
-    };
+  } catch (error) {
+    throw new Error("Error fetching dealership info:" + error.message);
   }
 }
 

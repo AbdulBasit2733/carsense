@@ -47,6 +47,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { date } from "zod";
 
 const CarsList = () => {
   const [search, setSearch] = useState("");
@@ -74,10 +75,6 @@ const CarsList = () => {
     fn: updateCarFn,
     loading: updatingCar,
   } = useFetch(updateCarStatus);
-  console.log(
-    "🚀 ~ file: cars-list.tsx:35 ~ CarsList ~ updateResult:",
-    updateResult
-  );
 
   useEffect(() => {
     if (deleteResult?.success) {
@@ -174,11 +171,15 @@ const CarsList = () => {
       </div>
       <Card>
         <CardContent className="p-0">
-          {carsLoading && carsData && carsData.length === 0 ? (
+          {carsData?.data?.length === 0 ? (
+            <div className="text-center py-10 text-gray-500">
+              No cars found.
+            </div>
+          ) : carsLoading && carsData && carsData.data.length === 0 ? (
             <div>
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
             </div>
-          ) : carsData && carsData?.length > 0 ? (
+          ) : carsData && carsData?.data?.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -192,123 +193,128 @@ const CarsList = () => {
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-                {carsData && carsData.length > 0 ? (
+                {carsData?.data && carsData?.data?.length > 0 ? (
                   <TableBody>
-                    {carsData.map((car) => (
-                      <TableRow key={car.id}>
-                        {/* Car Image */}
-                        <TableCell className="w-10 h-10 rounded-md overflow-hidden">
-                          {car.images && car.images.length > 0 ? (
-                            <Image
-                              src={car.images[0]}
-                              alt={`${car.make} ${car.model}`}
-                              height={40}
-                              width={40}
-                              className="w-full h-full object-cover"
-                              priority
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                              <CarIcon className="h-6 w-6 text-gray-400" />
-                            </div>
-                          )}
-                        </TableCell>
-
-                        {/* Make & Model */}
-                        <TableCell>
-                          {car.make} {car.model}
-                        </TableCell>
-
-                        {/* Year */}
-                        <TableCell>{car.year}</TableCell>
-
-                        {/* Price */}
-                        <TableCell>{`$${car.price.toLocaleString()}`}</TableCell>
-
-                        {/* Status */}
-                        <TableCell>{getStatusBadge(car.status)}</TableCell>
-
-                        {/* Featured */}
-                        <TableCell>
-                          <Button
-                            disabled={updatingCar}
-                            variant={"ghost"}
-                            size={"sm"}
-                            className="p-0 h-9 w-9"
-                            onClick={() => handleToggleFeatured(car)}
-                          >
-                            {car.featured ? (
-                              <Star className="text-amber-500 fill-amber-500 h-5 w-5" />
+                    {carsData.data &&
+                      carsData.data?.map((car) => (
+                        <TableRow key={car.id}>
+                          {/* Car Image */}
+                          <TableCell className="w-10 h-10 rounded-md overflow-hidden">
+                            {car.images && car.images.length > 0 ? (
+                              <Image
+                                src={car.images[0]}
+                                alt={`${car.make} ${car.model}`}
+                                height={40}
+                                width={40}
+                                className="w-full h-full object-cover"
+                                priority
+                              />
                             ) : (
-                              <StarOff className="text-gray-400 h-5 w-5" />
+                              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                <CarIcon className="h-6 w-6 text-gray-400" />
+                              </div>
                             )}
-                          </Button>
-                        </TableCell>
+                          </TableCell>
 
-                        {/* Actions */}
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant={"ghost"}
-                                size={"sm"}
-                                className="p-0 h-8 w-8"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => router.push(`/cars/${car.id}`)}
-                              >
-                                <Eye className="mr-2 h-4 w-4" />
-                                View
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuLabel>Status</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleStatusUpdate(car, "AVAILABLE")
-                                }
-                                disabled={
-                                  car.status === "AVAILABLE" || updatingCar
-                                }
-                              >
-                                Set AVAILABLE
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleStatusUpdate(car, "UNAVAILABLE")
-                                }
-                                disabled={
-                                  car.status === "UNAVAILABLE" || updatingCar
-                                }
-                              >
-                                Set UNAVAILABLE
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleStatusUpdate(car, "SOLD")}
-                                disabled={car.status === "SOLD" || updatingCar}
-                              >
-                                Mark as SOLD
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setCarToDelete(car);
-                                  setDeleteDialogOpen(true);
-                                }}
-                                className="text-red-600"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          {/* Make & Model */}
+                          <TableCell>
+                            {car.make} {car.model}
+                          </TableCell>
+
+                          {/* Year */}
+                          <TableCell>{car.year}</TableCell>
+
+                          {/* Price */}
+                          <TableCell>{`$${car.price.toLocaleString()}`}</TableCell>
+
+                          {/* Status */}
+                          <TableCell>{getStatusBadge(car.status)}</TableCell>
+
+                          {/* Featured */}
+                          <TableCell>
+                            <Button
+                              disabled={updatingCar}
+                              variant={"ghost"}
+                              size={"sm"}
+                              className="p-0 h-9 w-9"
+                              onClick={() => handleToggleFeatured(car)}
+                            >
+                              {car.featured ? (
+                                <Star className="text-amber-500 fill-amber-500 h-5 w-5" />
+                              ) : (
+                                <StarOff className="text-gray-400 h-5 w-5" />
+                              )}
+                            </Button>
+                          </TableCell>
+
+                          {/* Actions */}
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant={"ghost"}
+                                  size={"sm"}
+                                  className="p-0 h-8 w-8"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem
+                                  onClick={() => router.push(`/cars/${car.id}`)}
+                                >
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Status</DropdownMenuLabel>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleStatusUpdate(car, "AVAILABLE")
+                                  }
+                                  disabled={
+                                    car.status === "AVAILABLE" || updatingCar
+                                  }
+                                >
+                                  Set AVAILABLE
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleStatusUpdate(car, "UNAVAILABLE")
+                                  }
+                                  disabled={
+                                    car.status === "UNAVAILABLE" || updatingCar
+                                  }
+                                >
+                                  Set UNAVAILABLE
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleStatusUpdate(car, "SOLD")
+                                  }
+                                  disabled={
+                                    car.status === "SOLD" || updatingCar
+                                  }
+                                >
+                                  Mark as SOLD
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setCarToDelete(car);
+                                    setDeleteDialogOpen(true);
+                                  }}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 ) : (
                   <TableBody>
