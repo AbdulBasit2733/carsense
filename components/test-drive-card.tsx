@@ -34,8 +34,8 @@ const formatTime = (timeString) => {
 
 // Helper function for status badge
 const getStatusBadge = ({ status }) => {
-    console.log(status);
-    
+  console.log(status);
+
   switch (status) {
     case "PENDING":
       return <Badge className="bg-amber-100 text-amber-800">Pending</Badge>;
@@ -75,10 +75,9 @@ const TestDriveCard = ({
         }`}
       >
         <div className="flex flex-col sm:flex-row">
+          {/* Left: Car Image */}
           <div className="sm:w-1/4 relative h-40 sm:h-auto">
-            {booking &&
-            booking.car?.images &&
-            booking.car.images?.length > 0 ? (
+            {booking?.car?.images?.length > 0 ? (
               <div className="relative w-full h-full">
                 <Image
                   src={booking.car.images[0]}
@@ -93,13 +92,15 @@ const TestDriveCard = ({
               </div>
             )}
 
+            {/* Mobile Status Badge */}
             <div className="absolute top-2 right-2 sm:hidden">
-              {
-                booking && getStatusBadge(booking.status)
-              }
+              {booking && getStatusBadge(booking.status)}
             </div>
           </div>
-          <div className="p-4 sm:w-1/2 sm:flex-1/2">
+
+          {/* Middle: Info */}
+          <div className="p-4 flex-1">
+            {/* Desktop Status Badge */}
             <div className="hidden sm:block mb-2">
               {booking && getStatusBadge(booking.status)}
             </div>
@@ -107,66 +108,63 @@ const TestDriveCard = ({
               {booking.car.year} {booking.car.make} {booking.car.model}
             </h3>
             {renderStatusSelector()}
-            <div className="space-y-2 my-2">
-              <div className="flex items-center text-gray-600">
+
+            <div className="space-y-2 my-2 text-sm text-gray-600">
+              <div className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2" />
                 {format(new Date(booking.bookingDate), "EEEE, MMMM d, yyyy")}
               </div>
-              <div className="flex items-center text-gray-600">
+              <div className="flex items-center">
                 <Clock className="h-4 w-4 mr-2" />
                 {formatTime(booking.startTime)} - {formatTime(booking.endTime)}
               </div>
-
-              {/* Show customer info in admin view */}
               {isAdmin && booking.user && (
-                <div className="flex items-center text-gray-600">
+                <div className="flex items-center">
                   <User className="h-4 w-4 mr-2" />
                   {booking.user.name || booking.user.email}
                 </div>
               )}
             </div>
 
-            {showActions && (
-              <div className="p-4 border-t sm:border-t-0 sm:border-2 sm:w-1/4 sm:flex sm:flex-col sm:justify-center sm:items-center sm:space-y-2">
-                {booking.notes && (
-                  <div className="bg-gray-50 p-2 rounded text-sm w-full">
-                    <p className="font-medium">Notes:</p>
-                    <p className="text-gray-600">{booking.notes}</p>
-                  </div>
-                )}
-                <Button
-                  variant={"outline"}
-                  size={"sm"}
-                  className="w-full my-2"
-                  asChild
-                >
-                  <Link
-                    href={`/cars/${booking.carId}`}
-                    className="flex items-center justify-center"
-                  >
-                    View Car
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                {(booking.status === "PENDING" ||
-                  booking.status === "CONFIRMED") && (
-                  <Button
-                    variant={"destructive"}
-                    size={"sm"}
-                    className="w-full"
-                    onClick={() => setCancelDialogOpen(true)}
-                    disabled={isCancelling}
-                  >
-                    {isCancelling ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      "Cancel"
-                    )}
-                  </Button>
-                )}
+            {/* Notes */}
+            {booking.notes && (
+              <div className="bg-gray-50 p-2 rounded text-sm my-2">
+                <p className="font-medium">Notes:</p>
+                <p className="text-gray-600">{booking.notes}</p>
               </div>
             )}
           </div>
+
+          {/* Right: Actions */}
+          {showActions && (
+            <div className="p-4 sm:w-1/4 border-t sm:border-t-0 sm:border-l flex flex-col space-y-2 justify-center items-stretch">
+              <Button variant="outline" size="sm" className="w-full" asChild>
+                <Link
+                  href={`/cars/${booking.carId}`}
+                  className="flex items-center justify-center"
+                >
+                  View Car
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              {(booking.status === "PENDING" ||
+                booking.status === "CONFIRMED") && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => setCancelDialogOpen(true)}
+                  disabled={isCancelling}
+                >
+                  {isCancelling ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Cancel"
+                  )}
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </Card>
 

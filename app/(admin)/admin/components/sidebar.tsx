@@ -20,7 +20,7 @@ const Routes = [
   {
     label: "Test Drive",
     icon: Calendar,
-    href: "/admin/test-drive",
+    href: "/admin/test-drives",
   },
   {
     label: "Settings",
