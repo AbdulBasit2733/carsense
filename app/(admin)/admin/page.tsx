@@ -1,8 +1,19 @@
+import { getDashboardData } from '@/actions/admin'
 import React from 'react'
+import Dashboard from './components/dashboard'
 
-const AdminPage = () => {
+export const metaData = {
+  title:"Dashboard | Carsense Admin",
+  description:"Admin dashboard for carsense marketplace"
+}
+
+const AdminPage = async () => {
+  const dashbaordData = await getDashboardData()
   return (
-    <div>AdminPage</div>
+    <div className='p-6'>
+      <h1 className='text-2xl font-bold mb-6'>Dashboard</h1>
+      <Dashboard initialData={dashbaordData}/>
+    </div>
   )
 }
 
