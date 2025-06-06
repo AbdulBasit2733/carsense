@@ -5,11 +5,8 @@ import { Button } from "./ui/button";
 import { ArrowLeft, CarFront, Heart, Layout } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { checkUser } from "@/lib/checkUser";
-import { log } from "console";
-
 const Header = async ({ isAdminPage }: { isAdminPage: boolean }) => {
   const user = await checkUser();
-  log("user", user);
   const isAdmin = user?.role === "ADMIN";
 
   return (
@@ -23,6 +20,7 @@ const Header = async ({ isAdminPage }: { isAdminPage: boolean }) => {
             height={60}
             className=" h-12 w-auto object-contain"
           />
+          {/* <h1 className="text-2xl font-bold gradient-logo">Carsense</h1> */}
           {isAdminPage && (
             <span className="text-xs font-extralight">admin</span>
           )}

@@ -135,3 +135,9 @@
     @apply bg-gradient-to-br from-blue-500 to-green-500 font-extrabold tracking-tighter pr-2 pb-2 text-transparent bg-clip-text;
   }
 }
+
+@layer utilities {
+  .gradient-logo {
+    @apply bg-gradient-to-br from-red-500 to-sky-500 font-extrabold tracking-tighter pr-2 text-transparent bg-clip-text
+  }
+}
