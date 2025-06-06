@@ -1,6 +1,7 @@
 import { getFeaturedCars } from "@/actions/home";
 import CarCard from "@/components/CarCard";
 import HomeSearch from "@/components/home-search";
+import OurTeamsSection from "@/components/our-teams";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import { Button } from "@/components/ui/button";
 import { carMakes } from "@/lib/data";
@@ -124,6 +125,8 @@ const Home = async () => {
           </div>
         </div>
       </section>
+
+      <OurTeamsSection />
     </div>
   );
 };
