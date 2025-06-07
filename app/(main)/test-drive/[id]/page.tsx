@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import React from "react";
 import TestDriveForm from "./components/test-drive-form";
 
-export async function generateMetaData() {
+export async function generateMetadata() {
   return {
     title: `Book Test Drive | Carsense`,
     description: `Schedule a test drive in few seconds`,
@@ -13,7 +13,7 @@ export async function generateMetaData() {
 const TestDrivePage = async ({ params }) => {
   // console.log("params",params);
   const { id } = await params;
-  console.log("test drive car id",id);
+  // console.log("test drive car id",id);
   
   const result = await getCarById(id);
   if (!result.success) {
