@@ -1,7 +1,8 @@
 import React from 'react'
 import SettingsForm from './components/settings-form'
+import { Metadata } from 'next'
 
-export const metaData  = {
+export const metadata:Metadata  = {
     title:" Settings | Carsense Admin",
     description:"Manage dealership working hours and admin users",
 }

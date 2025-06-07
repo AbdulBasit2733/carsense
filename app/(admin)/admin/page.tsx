@@ -1,8 +1,9 @@
 import { getDashboardData } from '@/actions/admin'
 import React from 'react'
 import Dashboard from './components/dashboard'
+import { Metadata } from 'next'
 
-export const metaData = {
+export const metadata:Metadata = {
   title:"Dashboard | Carsense Admin",
   description:"Admin dashboard for carsense marketplace"
 }

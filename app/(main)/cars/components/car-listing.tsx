@@ -2,18 +2,18 @@
 
 import { getCars } from "@/actions/car-listing";
 import useFetch from "@/hooks/use-fetch";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import CarListingsLoading from "./car-listings-loading";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, Terminal } from "lucide-react";
+import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import CarCard from "@/components/CarCard";
 
 const CarListing = () => {
   const searchParams = useSearchParams();
-  const router = useRouter();
+  // const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 6;
 
@@ -28,7 +28,7 @@ const CarListing = () => {
   const page = parseInt(searchParams.get("page") || "1");
 
   const { loading, fn: fetchCars, data: result, error } = useFetch(getCars);
-  console.log("fetch cars", result);
+  // console.log("fetch cars", result);
 
   useEffect(() => {
     fetchCars(
@@ -70,7 +70,7 @@ const CarListing = () => {
     return null;
   }
   const { data: cars, pagination } = result;
-  console.log(cars);
+  // console.log(cars);
 
   if (cars && cars?.length === 0) {
     return (

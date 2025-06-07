@@ -5,7 +5,7 @@ import Link from "next/link";
 import React from "react";
 
 const SavedCarsList = ({ initialData }) => {
-    console.log("Initial Saved Cars Data:", initialData);
+    // console.log("Initial Saved Cars Data:", initialData);
     
   if (!initialData?.data || initialData?.data.length === 0) {
     return (

@@ -3,23 +3,18 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation';
 import React from 'react'
 import ReservationsList from './components/reservations-list';
+import { Metadata } from 'next';
 
-export const metaData = {
+export const metadata:Metadata = {
     title:"My Reservations | Carsense",
     description:"Manage your test drive reservations"
 }
-
-
-
-
 
 const Reservations = async () => {
     const {userId} = await auth();
     if(!userId) {
         redirect('/sign-in?redirect=/reservations')
     }
-
-
     const reservationsResult = await getUserTestDrive()
     // console.log("Reservations Result",reservationsResult);
     

@@ -230,7 +230,7 @@ useEffect(() => {
 useEffect(() => {
   if (processImageResult && uploadedAIImage) {
     const carDetails = processImageResult?.data;
-    console.log("Extracted Car Details:", carDetails); // Debug log
+    // console.log("Extracted Car Details:", carDetails);
     
     setValue("make", carDetails.make);
     setValue("model", carDetails.model);

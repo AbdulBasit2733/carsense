@@ -1,7 +1,8 @@
 import React from 'react'
 import AddCarForm from '../components/add-car-form'
+import { Metadata } from 'next'
 
-export const metadata = {
+export const metadata:Metadata = {
     title: "Add Car | Carsense Admin",
     description: "Carsense Admin Panel - Add Car",
 }

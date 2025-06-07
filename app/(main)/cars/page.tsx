@@ -2,15 +2,16 @@ import { getCarFilters } from "@/actions/car-listing";
 import React from "react";
 import CarFilters from "./components/cars-filters";
 import CarListing from "./components/car-listing";
+import { Metadata } from "next";
 
-export const metaData = {
+export const metadata:Metadata = {
   title: "Cars | Carsense",
   description: "Browse and search for your dream car",
 };
 
 const CarsPage = async () => {
   const filtersData = await getCarFilters();
-  console.log("Filters Data",filtersData);
+  // console.log("Filters Data",filtersData);
   
   return (
     <div className="container mx-auto px-4 py-12">

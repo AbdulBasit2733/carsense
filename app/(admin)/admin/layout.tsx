@@ -6,7 +6,7 @@ import Sidebar from "./components/sidebar";
 
 const AdminLayout = async ({ children }) => {
   const admin = await getAdmin();
-  console.log("admin", admin);
+  // console.log("admin", admin);
   if (!admin.authorized) {
     return notFound();
   }

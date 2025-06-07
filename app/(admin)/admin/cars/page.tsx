@@ -1,7 +1,8 @@
 import React from 'react'
 import CarsList from './components/cars-list'
+import { Metadata } from 'next'
 
-export const metaData = {
+export const metadata:Metadata = {
     title:"Cars | Carsense Admin",
     description:"Carsense Admin Panel - Cars",
 }
