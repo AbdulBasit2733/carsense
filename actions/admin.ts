@@ -112,7 +112,7 @@ export async function getAdminTestDrives({ search = "", status = "" }) {
   }
 }
 
-export async function updateTestDriveStatus(bookingId, newStatus) {
+export async function updateTestDriveStatus(bookingId:any, newStatus:any) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
@@ -162,7 +162,7 @@ export async function updateTestDriveStatus(bookingId, newStatus) {
       success: true,
       message: "Test Drive status updated successfully",
     };
-  } catch (error) {
+  } catch (error:any) {
     throw new Error("Error updating test drive status" + error.message);
   }
 }

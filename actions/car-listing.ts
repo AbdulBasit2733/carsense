@@ -3,7 +3,6 @@ import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { serializedCarData } from "../lib/helper";
-import { error } from "console";
 export async function getCarFilters() {
   try {
     const makes = await db.car.findMany({
@@ -76,7 +75,7 @@ export async function getCarFilters() {
         },
       },
     };
-  } catch (error) {
+  } catch (error:any) {
     throw new Error("Error fetching car filters" + error?.message);
   }
 }
@@ -187,12 +186,12 @@ export async function getCars({
         pages: Math.ceil(totalCars / limit),
       },
     };
-  } catch (error) {
+  } catch (error:any) {
     throw new Error("Error fetching cars" + error?.message);
   }
 }
 
-export async function toggleSavedCars(carId) {
+export async function toggleSavedCars(carId:any) {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -260,7 +259,7 @@ export async function toggleSavedCars(carId) {
       saved: true,
       message: "Car Added to favourites",
     };
-  } catch (error) {
+  } catch (error:any) {
     throw new Error("Error toggling saved car:" + error.message);
   }
 }
@@ -303,7 +302,7 @@ export async function getSavedCars() {
       success: true,
       data: cars,
     };
-  } catch (error) {
+  } catch (error:any) {
     console.log("Error fetching saved cars", error);
     return {
       success: false,
@@ -312,7 +311,7 @@ export async function getSavedCars() {
   }
 }
 
-export async function getCarById(carId) {
+export async function getCarById(carId:any) {
   try {
     const { userId } = await auth();
     let dbUser = null;
@@ -395,7 +394,7 @@ export async function getCarById(carId) {
       }
     }
 
-  } catch (error) {
+  } catch (error:any) {
     throw new Error ("Error fetching car details:" + error?.message)
   }
 }

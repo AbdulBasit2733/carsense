@@ -6,20 +6,19 @@ import { db } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase";
 import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { error } from "console";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
 
 type Result = { success: true; data?: Car } | { success: false; error: string };
 
-const fileToBase64 = async (file) => {
+const fileToBase64 = async (file: any) => {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   return buffer.toString("base64");
 };
 
-export async function processCarImageWithAI(file) {
+export async function processCarImageWithAI(file:any) {
   try {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("Gemini API key is not configured");
@@ -119,7 +118,13 @@ export async function processCarImageWithAI(file) {
   }
 }
 
-export async function addCar({ carData, images }): Promise<Result> {
+export async function addCar({
+  carData,
+  images,
+}: {
+  carData: any;
+  images: any;
+}): Promise<Result> {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -195,7 +200,7 @@ export async function addCar({ carData, images }): Promise<Result> {
     return {
       success: true,
     };
-  } catch (error) {
+  } catch (error:any) {
     throw new Error("Error adding car: " + error?.message);
   }
 }
@@ -235,7 +240,7 @@ export async function getCars({ search }: { search?: string }) {
 
     return {
       success: true,
-      data: cars.map(serializedCarData) || [],
+      data: cars.map((car) => serializedCarData(car)) || [],
     };
   } catch (error: any) {
     console.error("Error fetching cars:", error.message || error);
@@ -289,7 +294,7 @@ export const deleteCar = async (carId: any): Promise<Result> => {
           const pathMatch = url.pathname.match(/\/car-images\/(.*)/);
           return pathMatch ? pathMatch[1] : null;
         })
-        .filter(Boolean);
+        .filter((path): path is string => Boolean(path));
 
       if (filePath.length > 0) {
         const { error } = await supabase.storage
@@ -306,7 +311,7 @@ export const deleteCar = async (carId: any): Promise<Result> => {
     return {
       success: true,
     };
-  } catch (error) {
+  } catch (error:any) {
     console.log("Error deleting car:", error);
     return {
       success: false,

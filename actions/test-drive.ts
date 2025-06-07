@@ -11,6 +11,12 @@ export async function bookTestDrive({
   startTime,
   endTime,
   notes,
+}: {
+  carId: string;
+  bookingDate: string | Date;
+  startTime: string;
+  endTime: string;
+  notes?: string;
 }) {
   try {
     const { userId } = await auth();
@@ -67,7 +73,7 @@ export async function bookTestDrive({
       success: true,
       data: booking,
     };
-  } catch (error) {
+  } catch (error:any) {
     console.log("Error booking test drive", error);
     return {
       success: false,
@@ -116,7 +122,7 @@ export async function getUserTestDrive() {
       success: true,
       data: formattedBookings,
     };
-  } catch (error) {
+  } catch (error:any) {
     console.error("Error fetching test drive");
     return {
       success: false,
@@ -125,7 +131,7 @@ export async function getUserTestDrive() {
   }
 }
 
-export async function cancelTestDrive(bookingId) {
+export async function cancelTestDrive(bookingId:any) {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -186,7 +192,7 @@ export async function cancelTestDrive(bookingId) {
       success: true,
       message: "Test drive cancelled successfully",
     };
-  } catch (error) {
+  } catch (error:any) {
     console.error("Error in canceling test drive");
     return {
       success: false,

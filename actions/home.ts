@@ -6,7 +6,7 @@ import { db } from "@/lib/prisma";
 import { request } from "@arcjet/next";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const fileToBase64 = async (file) => {
+const fileToBase64 = async (file: any) => {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   return buffer.toString("base64");
@@ -25,14 +25,14 @@ export async function getFeaturedCars(limit = 3) {
       },
     });
 
-    return cars.map(serializedCarData);
-  } catch (error) {
+    return cars.map((car) => serializedCarData(car));
+  } catch (error: any) {
     console.log(error);
     throw new Error("Error fetching featured cars:" + error?.message);
   }
 }
 
-export async function processImageSearch(file) {
+export async function processImageSearch(file: any) {
   try {
     //Rate limiting with arcjet
     const req = await request();
@@ -104,7 +104,7 @@ export async function processImageSearch(file) {
         error: "Failed to parse AI response",
       };
     }
-  } catch (error) {
+  } catch (error: any) {
     throw new Error("AI search error:" + error?.message);
   }
 }
