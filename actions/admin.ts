@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@/lib/generated/prisma";
 import { serializedCarData } from "@/lib/helper";
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
@@ -37,10 +38,10 @@ export async function getAdminTestDrives({ search = "", status = "" }) {
       throw new Error("Unauthorize Access");
     }
 
-    let where = {};
+    let where: Prisma.TestDriveBookingWhereInput = {};
 
     if (status) {
-      where.status = status;
+      where.status = status as any;
     }
 
     if (search) {
@@ -102,7 +103,7 @@ export async function getAdminTestDrives({ search = "", status = "" }) {
       success: true,
       data: formattedBookings,
     };
-  } catch (error:any) {
+  } catch (error: any) {
     console.error("Error fetching test drives:", error);
     return {
       success: false,
@@ -113,56 +114,56 @@ export async function getAdminTestDrives({ search = "", status = "" }) {
 
 export async function updateTestDriveStatus(bookingId, newStatus) {
   try {
-    const {userId} = await auth();
-    if(!userId) throw new Error("Unauthorized")
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
 
     const user = await db.user.findUnique({
-      where:{
-        clerkUserId:userId
-      }
-    })
+      where: {
+        clerkUserId: userId,
+      },
+    });
 
-    if(!user || user.role !== "ADMIN"){
-      throw new Error("Unauthorized Access")
+    if (!user || user.role !== "ADMIN") {
+      throw new Error("Unauthorized Access");
     }
     const booking = await db.testDriveBooking.findUnique({
-      where:{
-        id:bookingId
-      }
-    })
-    if(!booking){
-      throw new Error("Booking not found")
+      where: {
+        id: bookingId,
+      },
+    });
+    if (!booking) {
+      throw new Error("Booking not found");
     }
     const validStatuses = [
       "PENDING",
       "CONFIRMED",
       "COMPLETED",
       "CANCELED",
-      "NO_SHOW"
-    ]
-    if(!validStatuses.includes(newStatus)){
+      "NO_SHOW",
+    ];
+    if (!validStatuses.includes(newStatus)) {
       return {
-        success:false,
-        error:"Invalid Status"
-      }
+        success: false,
+        error: "Invalid Status",
+      };
     }
     await db.testDriveBooking.update({
-      where:{
-        id:bookingId
+      where: {
+        id: bookingId,
       },
-      data:{
-        status:newStatus
-      }
-    })
+      data: {
+        status: newStatus,
+      },
+    });
 
-    revalidatePath('/admin/test-drives')
-    revalidatePath('/reservations')
+    revalidatePath("/admin/test-drives");
+    revalidatePath("/reservations");
     return {
-      success:true,
-      message:"Test Drive status updated successfully"
-    }
+      success: true,
+      message: "Test Drive status updated successfully",
+    };
   } catch (error) {
-    throw new Error ("Error updating test drive status" + error.message)
+    throw new Error("Error updating test drive status" + error.message);
   }
 }
 
@@ -269,7 +270,7 @@ export async function getDashboardData() {
         },
       },
     };
-  } catch (error:any) {
+  } catch (error: any) {
     console.error("Error fetching dashboard data:", error.message);
     return {
       success: false,

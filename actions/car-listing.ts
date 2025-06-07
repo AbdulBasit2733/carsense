@@ -105,7 +105,7 @@ export async function getCars({
       });
     }
 
-    let where = {
+    let where: any = {
       status: "AVAILABLE",
     };
 
@@ -126,11 +126,11 @@ export async function getCars({
       where.transmission = { equals: transmission, mode: "insensitive" };
 
     where.price = {
-      gte: parseFloat(minPrice) || 0,
+      gte: typeof minPrice === "string" ? parseFloat(minPrice) || 0 : minPrice || 0,
     };
 
     if (maxPrice && maxPrice < Number.MAX_SAFE_INTEGER) {
-      where.price.lte = parseFloat(maxPrice);
+      where.price.lte = maxPrice;
     }
 
     const skip = (page - 1) * limit;

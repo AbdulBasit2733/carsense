@@ -340,8 +340,13 @@ export const updateCarStatus = async (
       throw new Error("Car not found");
     }
 
-    const updateData: { status?: string; featured?: boolean } = {};
-    if (status !== undefined) updateData.status = status;
+    // Import CarStatus enum from your Prisma client if not already imported
+    // import { CarStatus } from "@prisma/client";
+    const updateData: { status?: any; featured?: boolean } = {};
+    if (status !== undefined) {
+      // Cast status to CarStatus enum if necessary
+      updateData.status = status as any;
+    }
     if (featured !== undefined) updateData.featured = featured;
 
     const updatedCar = await db.car.update({
