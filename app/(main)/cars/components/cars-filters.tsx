@@ -25,7 +25,7 @@ import {
 import { CarFilterProps, FilterName } from "./filters-type";
 
 const CarFilters: React.FC<CarFilterProps> = ({ filters }) => {
-  console.log(filters);
+  // console.log(filters);
 
   const router = useRouter();
   const pathname = usePathname();

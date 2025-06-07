@@ -1,5 +1,4 @@
 import { getFeaturedCars } from "@/actions/home";
-import CarCard from "@/components/CarCard";
 import HomeSearch from "@/components/home-search";
 import OurTeamsSection from "@/components/our-teams";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
@@ -13,8 +12,6 @@ import React from "react";
 
 const Home = async () => {
   const featuredCars = await getFeaturedCars();
-  console.log(featuredCars);
-
   return (
     <div className="pt-20 flex flex-col">
       {/* Hero Section */}

@@ -8,7 +8,7 @@ import Link from "next/link";
 import React from "react";
 
 const ReservationsList = ({ initialData }) => {
-    console.log("Initial Data", initialData);
+    // console.log("Initial Data", initialData);
     
   const {
     loading: cancelling,

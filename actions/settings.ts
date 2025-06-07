@@ -91,7 +91,7 @@ export async function getDealershipInfo() {
         updatedAt: dealership.updatedAt.toISOString(),
       },
     };
-  } catch (error) {
+  } catch (error:any) {
     throw new Error("Error fetching dealership info:" + error.message);
   }
 }
@@ -191,7 +191,7 @@ export async function getUsers() {
   }
 }
 
-export async function updateUserRole(userId: string, role ) {
+export async function updateUserRole(userId: string, role: any ) {
   try {
     const { userId: adminId } = await auth();
     if (!adminId) {

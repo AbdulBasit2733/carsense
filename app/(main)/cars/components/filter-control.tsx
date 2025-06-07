@@ -12,7 +12,7 @@ const CarFilterControls = ({
   onFilterChange,
   onClearFilter,
 }: CarFilterControlsProps) => {
-  console.log("current Filters", currentFilters);
+  // console.log("current Filters", currentFilters);
 
   const {
     make,
