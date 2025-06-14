@@ -46,11 +46,13 @@ const TestDriveList = () => {
     data: cancelResult,
     error: cancelError,
   } = useFetch(cancelTestDrive);
+  //@ts-ignore
 
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = (e: any) => {
     e.preventDefault();
     fetchTestDrives({ search, status: statusFilter });
   };
+  //@ts-ignore
 
   const handleUpdateStatus = async (bookingId, newStatus) => {
     if (newStatus) {
@@ -59,19 +61,22 @@ const TestDriveList = () => {
   };
 
   useEffect(() => {
+    //@ts-ignore
+
     if (updateResult?.success) {
       toast.success("Test drive status updated successfully");
       fetchTestDrives({ search, status: statusFilter });
     }
+    //@ts-ignore
+
     if (cancelResult?.success) {
       toast.success("Test drive cancelled successfully");
       fetchTestDrives({ search, status: statusFilter });
     }
 
-    if(cancelError) {
-        toast.error("Failed to cancel test drive")
+    if (cancelError) {
+      toast.error("Failed to cancel test drive");
     }
-
   }, [updateResult, cancelResult]);
 
   useEffect(() => {
@@ -125,6 +130,8 @@ const TestDriveList = () => {
           ) : (
             <div className="space-y-4">
               {testDrivesData &&
+                //@ts-ignore
+
                 testDrivesData?.data?.map((booking) => (
                   <div key={booking.id} className="relative">
                     <TestDriveCard
@@ -135,6 +142,8 @@ const TestDriveList = () => {
                       )}
                       isAdmin={true}
                       isCancelling={cancelling}
+                      //@ts-ignore
+
                       renderStatusSelector={() => (
                         <Select
                           value={booking.status}

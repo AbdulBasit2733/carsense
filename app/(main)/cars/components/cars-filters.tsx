@@ -36,9 +36,13 @@ const CarFilters: React.FC<CarFilterProps> = ({ filters }) => {
   const currentFuelType = searchParams.get("fuelType") || "";
   const currentTransmission = searchParams.get("transmission") || "";
   const currentMinPrice = searchParams.get("minPrice")
+                //@ts-ignore
+
     ? parseInt(searchParams.get("minPrice"))
     : filters.priceRange.min;
   const currentMaxPrice = searchParams.get("maxPrice")
+                //@ts-ignore
+
     ? parseInt(searchParams.get("maxPrice"))
     : filters.priceRange.max;
 

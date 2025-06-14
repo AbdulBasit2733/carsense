@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import React from "react";
 import Sidebar from "./components/sidebar";
 
-const AdminLayout = async ({ children }) => {
+const AdminLayout = async ({ children }:{
+  children:React.ReactNode
+}) => {
   const admin = await getAdmin();
   // console.log("admin", admin);
   if (!admin.authorized) {

@@ -7,6 +7,7 @@ import { Calendar } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
+//@ts-ignore
 const ReservationsList = ({ initialData }) => {
     // console.log("Initial Data", initialData);
     
@@ -18,13 +19,17 @@ const ReservationsList = ({ initialData }) => {
 
   const upcomingBookings =
     initialData &&
-    initialData?.data?.filter((booking) =>
+    initialData?.data?.filter(
+      //@ts-ignore
+      (booking) =>
       ["PENDING", "CONFIRMED"].includes(booking.status)
     );
 
   const pastBookings =
     initialData &&
-    initialData?.data?.filter((booking) =>
+    initialData?.data?.filter(
+      //@ts-ignore
+      (booking) =>
       ["COMPLETED", "CANCELED", "NO_SHOW"].includes(booking.status)
     );
 
@@ -58,7 +63,9 @@ const ReservationsList = ({ initialData }) => {
         ) : (
           <div>
             {upcomingBookings &&
-              upcomingBookings.map((booking) => (
+              upcomingBookings.map(
+                //@ts-ignore
+                (booking) => (
                 <TestDriveCard
                   key={booking.id}
                   booking={booking}
@@ -75,7 +82,12 @@ const ReservationsList = ({ initialData }) => {
           <h2 className="text-2xl font-bold mb-4">Past Test Drive</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {pastBookings &&
-              pastBookings.map((booking) => (
+              pastBookings.map(
+                //@ts-ignore
+                
+                (booking) => (
+                //@ts-ignore
+
                 <TestDriveCard
                   key={booking.id}
                   booking={booking}

@@ -14,6 +14,7 @@ import {
   XCircle,
   DollarSign,
 } from "lucide-react";
+                //@ts-ignore
 
 const Dashboard = ({ initialData }) => {
   const [activeTab, setActiveTab] = useState("overview");

@@ -22,7 +22,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${inter.className}`}>
-          <Header />
+          <Header isAdminPage={false}/>
           <main>{children}</main>
           <Toaster richColors />
           <Footer />
