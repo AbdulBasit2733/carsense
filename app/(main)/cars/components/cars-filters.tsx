@@ -90,7 +90,10 @@ const CarFilters: React.FC<CarFilterProps> = ({ filters }) => {
       case "transmission":
         setTransmission(value);
         break;
-      case "priceRange":
+      case "priceRangeMax":
+        setPriceRange(value);
+        break;
+      case "priceRangeMin":
         setPriceRange(value);
         break;
     }

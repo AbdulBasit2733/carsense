@@ -114,7 +114,12 @@ export async function processCarImageWithAI(file:any) {
     }
   } catch (error) {
     console.log("Gemini API error:", error);
-    throw new Error("Gemini API error: " + error?.message);
+    throw new Error(
+      "Gemini API error: " +
+        (error && typeof error === "object" && "message" in error
+          ? (error as any).message
+          : String(error))
+    );
   }
 }
 
@@ -356,7 +361,10 @@ export const updateCarStatus = async (
 
     const updatedCar = await db.car.update({
       where: { id: carId },
-      data: updateData,
+      data: {
+        status:updateData.status,
+        featured:updateData.featured
+      },
     });
 
     revalidatePath("/admin/cars");

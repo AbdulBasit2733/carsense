@@ -3,7 +3,13 @@ import NotFound from "@/app/not-found";
 import React from "react";
 import CarDetails from "./components/car-details";
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: {
+    id: string | number;
+  };
+}) {
   const { id } = await params;
   const result = await getCarById(id);
   if (!result.success) {

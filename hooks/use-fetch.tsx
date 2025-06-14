@@ -8,10 +8,9 @@ const useFetch = (cb: Function) => {
 
   const fn = async (...args: unknown[]) => {
     setLoading(true);
-    setError(null); 
+    setError(null);
     try {
-      const response = await cb(...args); // Assuming `cb` returns { success, data } or { success, error }
-      // console.log("usefetch response", response);
+      const response = await cb(...args);
       if (response.success) {
         setData(response); // Store the data if success is true
       } else {

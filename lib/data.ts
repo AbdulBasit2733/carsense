@@ -1,16 +1,18 @@
+import { Decimal } from "./generated/prisma/runtime/library";
+
 export type Car = {
-    id: number;
+    id: string;
     make: string;
     model: string;
     year: number;
-    price: number;
+    price: Decimal;
     images: string[];
-    transmission: "Automatic" | "Manual";
-    fuelType: "Gasoline" | "Electric" | "Diesel" | "Hybrid";
-    bodyType: "SUV" | "Sedan" | "Hatchback" | "Convertible";
+    transmission: string;
+    fuelType: string;
+    bodyType: string;
     mileage: number;
     color: string;
-    wishlisted: boolean;
+    featured: boolean;
   };
   
   export type CarMake = {
