@@ -31,51 +31,7 @@ export type Car = {
     question: string;
     answer: string;
   };
-  
-  export const featuredCars: Car[] = [
-    {
-      id: 1,
-      make: "Toyota",
-      model: "Camry",
-      year: 2023,
-      price: 28999,
-      images: ["/images/1.png"],
-      transmission: "Automatic",
-      fuelType: "Gasoline",
-      bodyType: "Sedan",
-      mileage: 15000,
-      color: "White",
-      featured: false,
-    },
-    {
-      id: 2,
-      make: "Honda",
-      model: "Civic",
-      year: 2023,
-      price: 26499,
-      images: ["/images/2.webp"],
-      transmission: "Manual",
-      fuelType: "Gasoline",
-      bodyType: "Sedan",
-      mileage: 12000,
-      color: "Blue",
-      featured: true,
-    },
-    {
-      id: 3,
-      make: "Tesla",
-      model: "Model 3",
-      year: 2022,
-      price: 42999,
-      images: ["/images/3.jpg"],
-      transmission: "Automatic",
-      fuelType: "Electric",
-      bodyType: "Sedan",
-      mileage: 8000,
-      color: "Red",
-      featured: false,
-    },
-  ];
+
   
   export const carMakes: CarMake[] = [
     { id: 1, name: "Hyundai", image: "/make/hyundai.webp" },
