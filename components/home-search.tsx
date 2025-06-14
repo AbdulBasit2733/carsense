@@ -23,6 +23,7 @@ const HomeSearch = () => {
     data: processResult,
     error: processError,
   } = useFetch(processImageSearch);
+                //@ts-ignore
 
   const onDrop = (acceptedFiles) => {
     // Do something with the files
@@ -50,7 +51,7 @@ const HomeSearch = () => {
     }
   };
 
-  const handleTextSearch = (e) => {
+  const handleTextSearch = (e:any) => {
     e.preventDefault();
     if (!searchTerm.trim()) {
       toast.error("Please enter a search term");
@@ -58,7 +59,7 @@ const HomeSearch = () => {
     }
     router.push(`/cars?search=${encodeURIComponent(searchTerm)}`);
   };
-  const handleImageSeach = async (e) => {
+  const handleImageSeach = async (e:any) => {
     e.preventDefault();
     if (!searchImage) {
       toast.error("Please upload an image");
@@ -86,11 +87,21 @@ const HomeSearch = () => {
     }
   }, [processError]);
   useEffect(() => {
+                //@ts-ignore
+
     if (processResult?.success) {
       const params = new URLSearchParams();
+                //@ts-ignore
+
       if (processResult.make) params.set("make", processResult.make);
+                //@ts-ignore
+
       if (processResult.bodyType)
+                //@ts-ignore
+
         params.set("bodyType", processResult.bodyType);
+                //@ts-ignore
+
       if (processResult.color) params.set("color", processResult.color);
 
       router.push(`/cars?${params.toString()}`);

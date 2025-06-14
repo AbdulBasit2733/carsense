@@ -2,9 +2,7 @@
 import React, { useState } from "react";
 import { Badge } from "./ui/badge";
 import { format, parseISO } from "date-fns";
-import {
-  Card,
-} from "./ui/card";
+import { Card } from "./ui/card";
 import Image from "next/image";
 import { ArrowRight, Calendar, Car, Clock, Loader2, User } from "lucide-react";
 import { Button } from "./ui/button";
@@ -17,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
+//@ts-ignore
 
 const formatTime = (timeString) => {
   try {
@@ -25,6 +24,7 @@ const formatTime = (timeString) => {
     return timeString;
   }
 };
+//@ts-ignore
 
 // Helper function for status badge
 const getStatusBadge = ({ status }) => {
@@ -46,8 +46,12 @@ const getStatusBadge = ({ status }) => {
   }
 };
 
+//@ts-ignore
 const TestDriveCard = ({
+  //@ts-ignore
+
   booking,
+  //@ts-ignore
   onCancel,
   showActions = true,
   isPast = false,

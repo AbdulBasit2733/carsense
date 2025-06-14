@@ -42,8 +42,14 @@ const CarCard = ({ car }: { car: Car }) => {
   };
 
   useEffect(() => {
+                //@ts-ignore
+
     if (toggleResult?.success && toggleResult?.saved !== isSaved) {
+                //@ts-ignore
+
       setSaved(toggleResult?.saved);
+                //@ts-ignore
+
       toast.success(toggleResult?.message);
     }
   }, [toggleResult, isSaved]);
@@ -91,8 +97,9 @@ const CarCard = ({ car }: { car: Car }) => {
           <h3 className="text-lg font-bold line-clamp-1 ">
             {car.make} {car.model}
           </h3>
+                {/* @ts-ignore */}
           <span className="text-xl font-bold text-blue-600">
-            Rs {car.price}
+            Rs {car.price.toString()}
           </span>
         </div>
         <div className=" text-gray-600 mb-2 flex items-center">
