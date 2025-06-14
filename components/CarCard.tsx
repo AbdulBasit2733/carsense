@@ -14,7 +14,7 @@ import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
 
 const CarCard = ({ car }: { car: Car }) => {
-  const [isSaved, setSaved] = useState(car.wishlisted);
+  const [isSaved, setSaved] = useState(car.featured);
   const router = useRouter();
   const { isSignedIn } = useAuth();
 
@@ -28,7 +28,7 @@ const CarCard = ({ car }: { car: Car }) => {
   console.log( "toggleResult",toggleResult);
   
 
-  const handleToggleSaved = async (e) => {
+  const handleToggleSaved = async (e:any) => {
     e.preventDefault();
     if (!isSignedIn) {
       toast.error("Please signin to save cars");

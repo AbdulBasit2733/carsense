@@ -45,7 +45,7 @@ export type Car = {
       bodyType: "Sedan",
       mileage: 15000,
       color: "White",
-      wishlisted: false,
+      featured: false,
     },
     {
       id: 2,
@@ -59,7 +59,7 @@ export type Car = {
       bodyType: "Sedan",
       mileage: 12000,
       color: "Blue",
-      wishlisted: true,
+      featured: true,
     },
     {
       id: 3,
@@ -73,7 +73,7 @@ export type Car = {
       bodyType: "Sedan",
       mileage: 8000,
       color: "Red",
-      wishlisted: false,
+      featured: false,
     },
   ];
   

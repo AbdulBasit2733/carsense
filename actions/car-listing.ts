@@ -161,7 +161,7 @@ export async function getCars({
       orderBy,
     });
 
-    let wishlisted = new Set();
+    let featured = new Set();
 
     if (dbUser) {
       const savedCars = await db.userSavedCars.findMany({
@@ -169,11 +169,11 @@ export async function getCars({
         select: { carId: true },
       });
 
-      wishlisted = new Set(savedCars.map((saved) => saved.carId));
+      featured = new Set(savedCars.map((saved) => saved.carId));
     }
 
     const serializedCars = cars.map((car) =>
-      serializedCarData(car, wishlisted.has(car.id))
+      serializedCarData(car, featured.has(car.id))
     );
 
     return {

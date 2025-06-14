@@ -10,7 +10,7 @@ export async function generateMetadata({
     id: string | number;
   };
 }) {
-  const { id } = await params;
+  const { id } = params;
   const result = await getCarById(id);
   if (!result.success) {
     return {
@@ -29,10 +29,14 @@ export async function generateMetadata({
   };
 }
 
-const CarPage = async ({ params }) => {
+const CarPage = async ({ params }:{
+  params:{
+    id:string| number
+  }
+}) => {
   // console.log("carspage",params);
 
-  const { id } = await params;
+  const { id } = params;
   const result = await getCarById(id);
   if (!result.success) {
     NotFound();
