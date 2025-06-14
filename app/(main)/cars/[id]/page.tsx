@@ -6,11 +6,11 @@ import CarDetails from "./components/car-details";
 export async function generateMetadata({
   params,
 }: {
-  params: {
+  params: Promise<{
     id: string | number;
-  };
+  }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
   const result = await getCarById(id);
   if (!result.success) {
     return {
@@ -30,13 +30,13 @@ export async function generateMetadata({
 }
 
 const CarPage = async ({ params }:{
-  params:{
+  params:Promise<{
     id:string| number
-  }
+  }>
 }) => {
   // console.log("carspage",params);
 
-  const { id } = params;
+  const { id } = await params;
   const result = await getCarById(id);
   if (!result.success) {
     NotFound();
