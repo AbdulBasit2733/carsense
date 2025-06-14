@@ -10,11 +10,17 @@ export async function generateMetadata() {
   };
 }
 
-const TestDrivePage = async ({ params }) => {
+const TestDrivePage = async ({
+  params,
+}: {
+  params: Promise<{
+    id: string | number;
+  }>;
+}) => {
   // console.log("params",params);
   const { id } = await params;
   // console.log("test drive car id",id);
-  
+
   const result = await getCarById(id);
   if (!result.success) {
     notFound();
@@ -23,7 +29,10 @@ const TestDrivePage = async ({ params }) => {
   return (
     <div className="container mx-auto px-4 py-12">
       <h1 className="text-6xl mb-6 gradient-title">Book a test drive</h1>
-      <TestDriveForm car={result.data} testDriveInfo={result.data.testDriveInfo}/>
+      <TestDriveForm
+        car={result.data}
+        testDriveInfo={result.data.testDriveInfo}
+      />
     </div>
   );
 };

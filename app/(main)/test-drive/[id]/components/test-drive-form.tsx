@@ -48,7 +48,18 @@ const testDriveSchema = z.object({
   notes: z.string().optional(),
 });
 
+interface CarProps {
+
+}
+
+interface TestDriveInfoProps {
+
+}
+
 const TestDriveForm = ({ car, testDriveInfo }) => {
+  console.log("car",car);
+  console.log("test",testDriveInfo);
+  
   const router = useRouter();
   const [availableTimeSlot, setAvailableTimeSlot] = useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
