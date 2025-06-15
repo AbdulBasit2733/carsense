@@ -23,8 +23,9 @@ import {
 } from "@/components/ui/select";
 
 import { CarFilterProps, FilterName } from "./filters-type";
+import { CarFilterData } from "@/types/filters";
 
-const CarFilters: React.FC<CarFilterProps> = ({ filters }) => {
+const CarFilters = ({ filters }: { filters: CarFilterData }) => {
   // console.log(filters);
 
   const router = useRouter();
@@ -36,13 +37,9 @@ const CarFilters: React.FC<CarFilterProps> = ({ filters }) => {
   const currentFuelType = searchParams.get("fuelType") || "";
   const currentTransmission = searchParams.get("transmission") || "";
   const currentMinPrice = searchParams.get("minPrice")
-                //@ts-ignore
-
     ? parseInt(searchParams.get("minPrice"))
     : filters.priceRange.min;
   const currentMaxPrice = searchParams.get("maxPrice")
-                //@ts-ignore
-
     ? parseInt(searchParams.get("maxPrice"))
     : filters.priceRange.max;
 
@@ -77,7 +74,7 @@ const CarFilters: React.FC<CarFilterProps> = ({ filters }) => {
     priceRangeMax: filters.priceRange.max,
   };
 
-  const handleFilterChange = (filterName:FilterName, value:any) => {
+  const handleFilterChange = (filterName: FilterName, value: any) => {
     switch (filterName) {
       case "make":
         setMake(value);
@@ -103,7 +100,7 @@ const CarFilters: React.FC<CarFilterProps> = ({ filters }) => {
     }
   };
 
-  const handleClearFilter = (filterName:FilterName) => {
+  const handleClearFilter = (filterName: FilterName) => {
     handleFilterChange(filterName, "");
   };
 

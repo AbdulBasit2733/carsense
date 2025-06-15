@@ -26,7 +26,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import useFetch from "@/hooks/use-fetch";
 import { cn } from "@/lib/utils";
+import { CarProps, TestDriveInfoProps } from "@/types/types";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { CalendarIcon, Car, CheckCircle2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -45,22 +47,40 @@ const testDriveSchema = z.object({
   notes: z.string().optional(),
 });
 
-//@ts-ignore
-const TestDriveForm = ({ car, testDriveInfo }) => {
+interface SlotsProps {
+  id: string;
+  label: string;
+  startTime: string;
+  endTime: string;
+}
+
+const TestDriveForm = ({
+  car,
+  testDriveInfo,
+}: {
+  car: CarProps;
+  testDriveInfo: TestDriveInfoProps;
+}) => {
   console.log("car", car);
   console.log("test", testDriveInfo);
 
   const router = useRouter();
-  const [availableTimeSlot, setAvailableTimeSlot] = useState([]);
+  const [availableTimeSlot, setAvailableTimeSlot] = useState<SlotsProps[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [bookingDetails, setBookingDetails] = useState(null);
+  const [bookingDetails, setBookingDetails] = useState<{
+    date: string;
+    timeSlot: string;
+    notes?: string;
+  } | null>(null);
 
   const {
-    loading: bookingInProgress,
-    fn: bookTestDriveFn,
+    mutate: bookTestDriveFn,
+    isPending: bookingInProgress,
     data: bookingResult,
     error: bookingError,
-  } = useFetch(bookTestDrive);
+  } = useMutation({
+    mutationFn: bookTestDrive,
+  });
 
   const {
     control,
@@ -79,21 +99,19 @@ const TestDriveForm = ({ car, testDriveInfo }) => {
   });
 
   const dealership = testDriveInfo?.dealership;
-  console.log("testdriveinfo", testDriveInfo);
+  // console.log("testdriveinfo", testDriveInfo);
 
-  const existingBookings = testDriveInfo?.existingbookings || [];
+  const existingBookings = testDriveInfo?.existingBookings || [];
   const selectedDate = watch("date");
 
-  //@ts-ignore
-  const isDayDisabled = (day) => {
+  const isDayDisabled = (day: any) => {
     if (day < new Date()) {
       return true;
     }
     const dayOfWeek = format(day, "EEEE").toUpperCase();
 
     const daySchedule = dealership?.workingHours?.find(
-      //@ts-ignore
-      (schedule) => schedule.dayOfWeek === dayOfWeek
+      (schedule: any) => schedule.dayOfWeek === dayOfWeek
     );
     return !daySchedule || !daySchedule.isOpen;
   };
@@ -101,8 +119,7 @@ const TestDriveForm = ({ car, testDriveInfo }) => {
     if (!selectedDate || !dealership?.workingHours) return;
     const selectedDayOfWeek = format(selectedDate, "EEEE").toUpperCase();
     const daySchedule = dealership.workingHours.find(
-      //@ts-ignore
-      (day) => day.dayOfWeek === selectedDayOfWeek
+      (day: any) => day.dayOfWeek === selectedDayOfWeek
     );
     if (!daySchedule || !daySchedule.isOpen) {
       setAvailableTimeSlot([]);
@@ -111,13 +128,12 @@ const TestDriveForm = ({ car, testDriveInfo }) => {
     const openHour = parseInt(daySchedule.openTime.split(":")[0]);
     const closeHour = parseInt(daySchedule.closeTime.split(":")[0]);
 
-    const slots = [];
-
+    const slots: SlotsProps[] = [];
     for (let hour = openHour; hour < closeHour; hour++) {
       const startTime = `${hour.toString().padStart(2, "0")}:00`;
       const endTime = `${(hour + 1).toString().padStart(2, "0")}:00`;
-      //@ts-ignore
-      const isBooked = existingBookings.some((booking) => {
+
+      const isBooked = existingBookings.some((booking: any) => {
         const bookingDate = booking.date;
         return (
           bookingDate === format(selectedDate, "yyyy-MM-dd") &&
@@ -133,27 +149,28 @@ const TestDriveForm = ({ car, testDriveInfo }) => {
         });
       }
     }
-    //@ts-ignore
+
     setAvailableTimeSlot(slots);
     setValue("timeSlot", "");
   }, [selectedDate]);
   useEffect(() => {
-    //@ts-ignore
     if (bookingResult?.success) {
       setBookingDetails({
-        //@ts-ignore
-        date: format(bookingResult?.data?.bookingDate, "EEEE, MMMM d, yyyy"),
+        date: bookingResult?.data?.bookingDate
+          ? format(
+              parseISO(bookingResult?.data?.bookingDate.toISOString()),
+              "EEEE, MMMM d, yyyy"
+            )
+          : "",
         timeSlot: `${format(
-          //@ts-ignore
           parseISO(`2022-01-01T${bookingResult?.data?.startTime}`),
           "h:mm:a"
         )} - ${format(
-          //@ts-ignore
           parseISO(`2022-01-01T${bookingResult?.data?.endTime}`),
           "h:mm:a"
         )}`,
-        //@ts-ignore
-        notes: bookingResult?.data?.notes,
+
+        notes: bookingResult?.data?.notes ?? "",
       });
       setShowConfirmation(true);
       reset();
@@ -163,15 +180,13 @@ const TestDriveForm = ({ car, testDriveInfo }) => {
   useEffect(() => {
     if (bookingError) {
       toast.error(
-        //@ts-ignore
         bookingError.message || "Failed to book test drive.Please try again"
       );
     }
   }, [bookingError]);
-  //@ts-ignore
-  const onSubmit = async (data) => {
+
+  const onSubmit = async (data: any) => {
     const selectedSlot = availableTimeSlot.find(
-      //@ts-ignore
       (slot) => slot.id === data.timeSlot
     );
     if (!selectedSlot) {
@@ -179,11 +194,10 @@ const TestDriveForm = ({ car, testDriveInfo }) => {
     }
     await bookTestDriveFn({
       carId: car.id,
-      bookingDate: format(data.date, "yyyy-MM-dd"),
-      //@ts-ignore
-      startTime: selectedSlot.startTime,
-      //@ts-ignore
-      endTime: selectedSlot.endTime,
+      bookingDate: format(parseISO(data.date), "yyyy-MM-dd"),
+
+      startTime: selectedSlot?.startTime ?? "",
+      endTime: selectedSlot?.endTime ?? "",
       notes: data.notes || "",
     });
   };
@@ -354,9 +368,7 @@ const TestDriveForm = ({ car, testDriveInfo }) => {
                           </SelectTrigger>
                           <SelectContent>
                             {availableTimeSlot.map((slot) => (
-                              //@ts-ignore
                               <SelectItem key={slot.id} value={slot.id}>
-                                {/* @ts-ignore */}
                                 {slot.label}
                               </SelectItem>
                             ))}

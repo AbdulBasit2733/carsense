@@ -9,7 +9,10 @@ import { revalidatePath } from "next/cache";
 export async function getAdmin() {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("Unauthorized");
+    return {
+      success: false,
+      message: "Unauthorize",
+    };
   }
   const user = await db.user.findUnique({
     where: {
@@ -26,7 +29,12 @@ export async function getAdmin() {
 export async function getAdminTestDrives({ search = "", status = "" }) {
   try {
     const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorize");
+    if (!userId) {
+      return {
+        success: false,
+        message: "Unauthorize",
+      };
+    }
 
     const user = await db.user.findUnique({
       where: {
@@ -35,7 +43,10 @@ export async function getAdminTestDrives({ search = "", status = "" }) {
     });
 
     if (!user || user.role !== "ADMIN") {
-      throw new Error("Unauthorize Access");
+      return {
+        success: false,
+        message: "Unauthorize Access",
+      };
     }
 
     let where: Prisma.TestDriveBookingWhereInput = {};
@@ -102,17 +113,18 @@ export async function getAdminTestDrives({ search = "", status = "" }) {
     return {
       success: true,
       data: formattedBookings,
+      message: "Fetch successfully",
     };
   } catch (error: any) {
     console.error("Error fetching test drives:", error);
     return {
       success: false,
-      error: error.message,
+      message: "Internal Server Error" + error.message,
     };
   }
 }
 
-export async function updateTestDriveStatus(bookingId:any, newStatus:any) {
+export async function updateTestDriveStatus(bookingId: any, newStatus: any) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
@@ -124,7 +136,10 @@ export async function updateTestDriveStatus(bookingId:any, newStatus:any) {
     });
 
     if (!user || user.role !== "ADMIN") {
-      throw new Error("Unauthorized Access");
+      return {
+        success: false,
+        message: "User Not found",
+      };
     }
     const booking = await db.testDriveBooking.findUnique({
       where: {
@@ -132,7 +147,10 @@ export async function updateTestDriveStatus(bookingId:any, newStatus:any) {
       },
     });
     if (!booking) {
-      throw new Error("Booking not found");
+      return {
+        success: false,
+        message: "Booking Not Found",
+      };
     }
     const validStatuses = [
       "PENDING",
@@ -144,7 +162,7 @@ export async function updateTestDriveStatus(bookingId:any, newStatus:any) {
     if (!validStatuses.includes(newStatus)) {
       return {
         success: false,
-        error: "Invalid Status",
+        message: "Invalid Status",
       };
     }
     await db.testDriveBooking.update({
@@ -162,8 +180,11 @@ export async function updateTestDriveStatus(bookingId:any, newStatus:any) {
       success: true,
       message: "Test Drive status updated successfully",
     };
-  } catch (error:any) {
-    throw new Error("Error updating test drive status" + error.message);
+  } catch (error: any) {
+    return {
+      success: false,
+      message: "Error updating test drive status",
+    };
   }
 }
 
@@ -180,7 +201,7 @@ export async function getDashboardData() {
     if (!user || user.role !== "ADMIN") {
       return {
         success: false,
-        error: "Unauthorized",
+        message: "Unauthorized",
       };
     }
 
@@ -274,7 +295,7 @@ export async function getDashboardData() {
     console.error("Error fetching dashboard data:", error.message);
     return {
       success: false,
-      error: error.message,
+      message: error.message,
     };
   }
 }

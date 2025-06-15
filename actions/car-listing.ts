@@ -3,6 +3,8 @@ import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { serializedCarData } from "../lib/helper";
+
+
 export async function getCarFilters() {
   try {
     const makes = await db.car.findMany({
@@ -75,8 +77,11 @@ export async function getCarFilters() {
         },
       },
     };
-  } catch (error:any) {
-    throw new Error("Error fetching car filters" + error?.message);
+  } catch (error: any) {
+     return {
+      success: false,
+      message: "Error toggling saved car: " + error.message,
+    };
   }
 }
 
@@ -125,7 +130,10 @@ export async function getCars({
       where.transmission = { equals: transmission, mode: "insensitive" };
 
     where.price = {
-      gte: typeof minPrice === "string" ? parseFloat(minPrice) || 0 : minPrice || 0,
+      gte:
+        typeof minPrice === "string"
+          ? parseFloat(minPrice) || 0
+          : minPrice || 0,
     };
 
     if (maxPrice && maxPrice < Number.MAX_SAFE_INTEGER) {
@@ -186,57 +194,42 @@ export async function getCars({
         pages: Math.ceil(totalCars / limit),
       },
     };
-  } catch (error:any) {
-    throw new Error("Error fetching cars" + error?.message);
+  } catch (error: any) {
+     return {
+      success: false,
+      message: "Error toggling saved car: " + error.message,
+    };
   }
 }
 
-export async function toggleSavedCars(carId:any) {
+export async function toggleSavedCars(carId: any) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      throw new Error("User not authenticated");
+      return { success: false, message: "User not authenticated" };
     }
 
     const user = await db.user.findUnique({
-      where: {
-        clerkUserId: userId,
-      },
+      where: { clerkUserId: userId },
     });
-
     if (!user) {
-      throw new Error("User not found");
+      return { success: false, message: "User not found" };
     }
 
     const car = await db.car.findUnique({
-      where: {
-        id: carId,
-      },
+      where: { id: carId },
     });
     if (!car) {
-      return {
-        success: false,
-        message: "Car not found",
-      };
+      return { success: false, message: "Car not found" };
     }
 
     const existingSave = await db.userSavedCars.findUnique({
-      where: {
-        userId_carId: {
-          userId: user.id,
-          carId: carId,
-        },
-      },
+      where: { userId_carId: { userId: user.id, carId } },
     });
 
     if (existingSave) {
       await db.userSavedCars.delete({
-        where: {
-          userId_carId: {
-            userId: user.id,
-            carId,
-          },
-        },
+        where: { userId_carId: { userId: user.id, carId } },
       });
       revalidatePath("/saved-cars");
       return {
@@ -247,22 +240,22 @@ export async function toggleSavedCars(carId:any) {
     }
 
     await db.userSavedCars.create({
-      data: {
-        userId: user.id,
-        carId,
-      },
+      data: { userId: user.id, carId },
     });
-
     revalidatePath("/saved-cars");
     return {
       success: true,
       saved: true,
-      message: "Car Added to favourites",
+      message: "Car added to favourites",
     };
-  } catch (error:any) {
-    throw new Error("Error toggling saved car:" + error.message);
+  } catch (error: any) {
+    return {
+      success: false,
+      message: "Error toggling saved car: " + error.message,
+    };
   }
 }
+
 
 export async function getSavedCars() {
   try {
@@ -301,17 +294,18 @@ export async function getSavedCars() {
     return {
       success: true,
       data: cars,
+      message:"Fetch Successfully"
     };
-  } catch (error:any) {
+  } catch (error: any) {
     console.log("Error fetching saved cars", error);
-    return {
+     return {
       success: false,
-      error: error.message,
+      message: "Error toggling saved car: " + error.message,
     };
   }
 }
 
-export async function getCarById(carId:any) {
+export async function getCarById(carId: any) {
   try {
     const { userId } = await auth();
     let dbUser = null;
@@ -324,77 +318,79 @@ export async function getCarById(carId:any) {
       });
     }
     const car = await db.car.findUnique({
-      where:{
-        id:carId
-      }
-    })
+      where: {
+        id: carId,
+      },
+    });
 
-    if(!car) {
+    if (!car) {
       return {
-        success:false,
-        error:"Car not found !"
-      }
+        success: false,
+        error: "Car not found !",
+      };
     }
     let isWhishlisted = false;
-    if(dbUser) {
+    if (dbUser) {
       const savedCar = await db.userSavedCars.findUnique({
-        where:{
-          userId_carId:{
-            userId:dbUser.id,
-            carId
-          }
-        }
-        
-      })
-      isWhishlisted = !!savedCar 
+        where: {
+          userId_carId: {
+            userId: dbUser.id,
+            carId,
+          },
+        },
+      });
+      isWhishlisted = !!savedCar;
     }
     const existingTestDrive = await db.testDriveBooking.findFirst({
-      where:{
+      where: {
         carId,
-        userId:dbUser?.id,
-        status:{in:['PENDING', 'CONFIRMED', 'COMPLETED']}
+        userId: dbUser?.id,
+        status: { in: ["PENDING", "CONFIRMED", "COMPLETED"] },
       },
-      orderBy:{
-        createdAt:"asc"
-      }
-    })
-    let userTestDrive = null
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+    let userTestDrive = null;
 
-
-    if(existingTestDrive){
+    if (existingTestDrive) {
       userTestDrive = {
-        id:existingTestDrive.id,
-        status:existingTestDrive.status,
-        bookingDate:existingTestDrive.bookingDate.toString()
-      }
+        id: existingTestDrive.id,
+        status: existingTestDrive.status,
+        bookingDate: existingTestDrive.bookingDate.toString(),
+      };
     }
     const dealership = await db.dealerShipInfo.findFirst({
-      include:{
-        workingHours:true
-      }
-    })
+      include: {
+        workingHours: true,
+      },
+    });
 
     return {
-      success:true,
-      data:{
-        ...serializedCarData(car,isWhishlisted),
-        testDriveInfo:{
+      success: true,
+      data: {
+        ...serializedCarData(car, isWhishlisted),
+        testDriveInfo: {
           userTestDrive,
-          dealership:dealership ? {
-            ...dealership,
-            createdAt:dealership.createdAt.toISOString(),
-            updatedAt:dealership.updatedAt.toISOString(),
-            workingHours:dealership.workingHours.map((hour) => ({
-              ...hour,
-              createdAt:hour.createdAt.toISOString(),
-              updatedAt:hour.updatedAt.toISOString()
-            }))
-          } : null
-        }
-      }
-    }
-
-  } catch (error:any) {
-    throw new Error ("Error fetching car details:" + error?.message)
+          dealership: dealership
+            ? {
+                ...dealership,
+                createdAt: dealership.createdAt.toISOString(),
+                updatedAt: dealership.updatedAt.toISOString(),
+                workingHours: dealership.workingHours.map((hour) => ({
+                  ...hour,
+                  createdAt: hour.createdAt.toISOString(),
+                  updatedAt: hour.updatedAt.toISOString(),
+                })),
+              }
+            : null,
+        },
+      },
+    };
+  } catch (error: any) {
+     return {
+      success: false,
+      message: "Error toggling saved car: " + error.message,
+    };
   }
 }

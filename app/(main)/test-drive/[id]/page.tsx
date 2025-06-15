@@ -2,6 +2,7 @@ import { getCarById } from "@/actions/car-listing";
 import { notFound } from "next/navigation";
 import React from "react";
 import TestDriveForm from "./components/test-drive-form";
+import { GetCarByIdResponse } from "@/types/types";
 
 export async function generateMetadata() {
   return {
@@ -12,9 +13,8 @@ export async function generateMetadata() {
 
 //@ts-ignore
 const TestDrivePage = async ({ params }) => {
-  // console.log("params",params);
   const { id } = await params;
-  // console.log("test drive car id",id);
+
   
   const result = await getCarById(id);
   if (!result.success) {

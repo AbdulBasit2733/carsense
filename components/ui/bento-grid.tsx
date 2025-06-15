@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import Link from "next/link";
 
 export const BentoGrid = ({
   className,
@@ -23,6 +24,7 @@ export const BentoGrid = ({
 export const BentoGridItem = ({
   className,
   title,
+  id,
   description,
   header,
   icon,
@@ -33,8 +35,9 @@ export const BentoGridItem = ({
   isLarge = false,
 }: {
   className?: string;
-  title?: string | React.ReactNode;
-  description?: string | React.ReactNode;
+  title?: string;
+  id:string;
+  description?: string;
   header?: React.ReactNode;
   icon?: React.ReactNode;
   price?: number;
@@ -51,6 +54,7 @@ export const BentoGridItem = ({
         className,
       )}
     >
+      <Link href={`/cars/${id}`}>
       {/* Car Image */}
       {typeof icon === 'string' && (
         <div className="relative h-full w-full">
@@ -59,7 +63,7 @@ export const BentoGridItem = ({
             alt={typeof title === 'string' ? title : 'Car image'}
             fill
             className="object-cover"
-          />
+            />
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         </div>
@@ -113,6 +117,7 @@ export const BentoGridItem = ({
           )}
         </div>
       </div>
+          </Link>
     </div>
   );
 };

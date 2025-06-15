@@ -25,16 +25,24 @@ export async function getFeaturedCars(limit = 3) {
       },
     });
 
-    return cars.map((car) => serializedCarData(car));
+    return {
+      success: true,
+      message: "Fetch Successfully",
+      data: cars.map((car) => serializedCarData(car)),
+    };
   } catch (error: any) {
     console.log(error);
-    throw new Error("Error fetching featured cars:" + error?.message);
+    // throw new Error(":" + error?.message);
+    return {
+      success: false,
+      message: "Error fetching featured cars",
+    };
   }
 }
 
 export async function processImageSearch(file: any) {
   try {
-    //Rate limiting with arcjet
+    // Rate limiting with arcjet
     const req = await request();
     const decision = await aj.protect(req, {
       requested: 1,
@@ -50,14 +58,24 @@ export async function processImageSearch(file: any) {
             resetInSeconds: reset,
           },
         });
-        throw new Error("Too Many Requests, Please try again later");
+        return {
+          success: false,
+          error: "Too Many Requests, Please try again later",
+        };
       }
-      throw new Error("Request Blocked");
+      return {
+        success: false,
+        error: "Request Blocked",
+      };
     }
 
     if (!process.env.GEMINI_API_KEY) {
-      throw new Error("Gemini API key is not configured");
+      return {
+        success: false,
+        error: "Gemini API key is not configured",
+      };
     }
+
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const base64Image = await fileToBase64(file);
@@ -91,11 +109,13 @@ export async function processImageSearch(file: any) {
     const response = await result.response;
     const text = await response.text(); // Ensure it's text before processing
     const cleanedText = text.replace(/```(?:json)?\n?/g, "").trim();
+
     try {
       const carDetails = JSON.parse(cleanedText);
       return {
         success: true,
         data: carDetails,
+        message:"Fetch successfully"
       };
     } catch (error) {
       console.error("Failed to parse AI response ", error);
@@ -105,6 +125,11 @@ export async function processImageSearch(file: any) {
       };
     }
   } catch (error: any) {
-    throw new Error("AI search error:" + error?.message);
+    console.error("AI search error:", error);
+    return {
+      success: false,
+      error: "AI search error: " + (error?.message || "Unknown error"),
+    };
   }
 }
+

@@ -10,18 +10,19 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
 
-type Result = { success: true; data?: Car } | { success: false; error: string };
-
 const fileToBase64 = async (file: any) => {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   return buffer.toString("base64");
 };
 
-export async function processCarImageWithAI(file:any) {
+export async function processCarImageWithAI(file: any) {
   try {
     if (!process.env.GEMINI_API_KEY) {
-      throw new Error("Gemini API key is not configured");
+      return {
+        success: false,
+        message: "Gemini API key is not configured",
+      };
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -96,30 +97,30 @@ export async function processCarImageWithAI(file:any) {
       );
 
       if (missingFields.length > 0) {
-        throw new Error(
-          `AI response Missing fields: ${missingFields.join(", ")}`
-        );
+        return {
+          success: false,
+          message: `AI response Missing fields: ${missingFields.join(", ")}`,
+        };
       }
 
       return {
         success: true,
         data: carDetails,
+        message: "Fetched Successfully",
       };
     } catch (error) {
       console.log("Failed to parse AI response:", error);
       return {
         success: false,
-        error: "Failed to parse AI response",
+        message: "Failed to parse AI response",
       };
     }
   } catch (error) {
     console.log("Gemini API error:", error);
-    throw new Error(
-      "Gemini API error: " +
-        (error && typeof error === "object" && "message" in error
-          ? (error as any).message
-          : String(error))
-    );
+    return {
+      success: false,
+      message: "Gemini API Error",
+    };
   }
 }
 
@@ -129,11 +130,14 @@ export async function addCar({
 }: {
   carData: any;
   images: any;
-}): Promise<Result> {
+}) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "User not authenticated",
+      };
     }
 
     const user = await db.user.findUnique({
@@ -143,7 +147,10 @@ export async function addCar({
     });
 
     if (!user) {
-      throw new Error("User not found");
+      return {
+        success: false,
+        message: "User not found",
+      };
     }
 
     const carId = uuidv4();
@@ -172,14 +179,20 @@ export async function addCar({
         });
       if (error) {
         console.error("Error uploading image:", error);
-        throw new Error("Error uploading image: " + error.message);
+        return {
+          success: false,
+          message: `Error uploading image: " + ${error.message}`,
+        };
       }
 
       const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/car-images/${filePath}`;
       imageUrls.push(publicUrl);
     }
     if (imageUrls.length === 0) {
-      throw new Error("No images uploaded successfully");
+      return {
+        success: false,
+        message: "No images uploaded successfully",
+      };
     }
 
     const car = await db.car.create({
@@ -204,9 +217,14 @@ export async function addCar({
     revalidatePath("/admin/cars");
     return {
       success: true,
+      message: "Added Car",
     };
-  } catch (error:any) {
-    throw new Error("Error adding car: " + error?.message);
+  } catch (error: any) {
+    // throw new Error("Error adding car: " + error?.message);
+    return {
+      success: false,
+      message: `Error adding car: + ${error?.message}`,
+    };
   }
 }
 
@@ -214,7 +232,11 @@ export async function getCars({ search }: { search?: string }) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      throw new Error("User not authenticated");
+      // throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "User not authenticated",
+      };
     }
 
     const user = await db.user.findUnique({
@@ -224,7 +246,11 @@ export async function getCars({ search }: { search?: string }) {
     });
 
     if (!user) {
-      throw new Error("User not found");
+      // throw new Error("");
+      return {
+        success: false,
+        message: "User not found",
+      };
     }
     const trimmed = typeof search === "string" ? search.trim() : "";
     const isSearch = trimmed.length > 0;
@@ -251,16 +277,20 @@ export async function getCars({ search }: { search?: string }) {
     console.error("Error fetching cars:", error.message || error);
     return {
       success: false,
-      error: error.message || "Something went wrong",
+      message: error.message || "Something went wrong",
     };
   }
 }
 
-export const deleteCar = async (carId: any): Promise<Result> => {
+export const deleteCar = async (carId: any) => {
   try {
     const { userId } = await auth();
     if (!userId) {
-      throw new Error("User not authenticated");
+      // throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "User not authenticated",
+      };
     }
 
     const user = await db.user.findUnique({
@@ -270,7 +300,11 @@ export const deleteCar = async (carId: any): Promise<Result> => {
     });
 
     if (!user) {
-      throw new Error("User not found");
+      // throw new Error("");
+      return {
+        success: false,
+        message: "User not found",
+      };
     }
 
     const car = await db.car.findUnique({
@@ -283,7 +317,7 @@ export const deleteCar = async (carId: any): Promise<Result> => {
     if (!car) {
       return {
         success: false,
-        error: "Car not found",
+        message: "Car not found",
       };
     }
 
@@ -315,12 +349,13 @@ export const deleteCar = async (carId: any): Promise<Result> => {
     revalidatePath("/admin/cars");
     return {
       success: true,
+      message: "car deleted successfully",
     };
-  } catch (error:any) {
+  } catch (error: any) {
     console.log("Error deleting car:", error);
     return {
       success: false,
-      error: error?.message || "Error deleting car",
+      message: error?.message || "Error deleting car",
     };
   }
 };
@@ -328,18 +363,26 @@ export const deleteCar = async (carId: any): Promise<Result> => {
 export const updateCarStatus = async (
   carId: string,
   { status, featured }: { status?: string; featured?: boolean }
-): Promise<Result> => {
+) => {
   try {
     const { userId } = await auth();
     if (!userId) {
-      throw new Error("User not authenticated");
+      // throw new Error("User not authenticated");
+      return {
+        success: false,
+        message: "User not authenticated",
+      };
     }
 
     const user = await db.user.findUnique({
       where: { clerkUserId: userId },
     });
     if (!user) {
-      throw new Error("User not found");
+      // throw new Error("");
+      return {
+        success: false,
+        message: "User not found",
+      };
     }
 
     const car = await db.car.findUnique({
@@ -347,11 +390,13 @@ export const updateCarStatus = async (
       select: { id: true },
     });
     if (!car) {
-      throw new Error("Car not found");
+      // throw new Error("");
+      return {
+        success: false,
+        message: "Car not found",
+      };
     }
 
-    // Import CarStatus enum from your Prisma client if not already imported
-    // import { CarStatus } from "@prisma/client";
     const updateData: { status?: any; featured?: boolean } = {};
     if (status !== undefined) {
       // Cast status to CarStatus enum if necessary
@@ -362,8 +407,8 @@ export const updateCarStatus = async (
     const updatedCar = await db.car.update({
       where: { id: carId },
       data: {
-        status:updateData.status,
-        featured:updateData.featured
+        status: updateData.status,
+        featured: updateData.featured,
       },
     });
 
@@ -373,16 +418,14 @@ export const updateCarStatus = async (
     return {
       success: true,
       data: updatedCar,
+      message: "Updated car successfully",
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating car status:", error);
 
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Unknown error occurred while updating car status",
+      message: error.message || "Internal Server Error",
     };
   }
 };

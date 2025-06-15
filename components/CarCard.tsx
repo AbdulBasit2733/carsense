@@ -1,75 +1,60 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "./ui/card";
 import Image from "next/image";
 import { CarIcon, Heart, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
-import { Car } from "@/lib/data";
 import { Badge } from "./ui/badge";
 import { useRouter } from "next/navigation";
-import useFetch from "@/hooks/use-fetch";
 import { toggleSavedCars } from "@/actions/car-listing";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { CarProps } from "@/types/types";
 
-const CarCard = ({ car }: { car: Car }) => {
+const CarCard = ({ car }: { car: CarProps }) => {
   const [isSaved, setSaved] = useState(car.featured);
   const router = useRouter();
   const { isSignedIn } = useAuth();
 
-  const {
-    loading: isToggling,
-    fn: toggleSavedCarFn,
-    data: toggleResult,
-    error: toggleError,
-  } = useFetch(toggleSavedCars);
+  const { mutate: toggleSavedCar, isPending: isToggling } = useMutation({
+    mutationFn: toggleSavedCars,
+    onSuccess: (data) => {
+      if (data.success) {
+        setSaved(data.saved ?? false);
+        toast.success(data.message);
+      } else {
+        toast.error(data.message || "Failed to update favourites");
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Error toggling favourites");
+    },
+  });
 
-  console.log( "toggleResult",toggleResult);
-  
-
-  const handleToggleSaved = async (e:any) => {
+  const handleToggleSaved = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!isSignedIn) {
-      toast.error("Please signin to save cars");
+      toast.error("Please sign in to save cars");
       router.push("/sign-in");
       return;
     }
-
     if (isToggling) return;
 
-    await toggleSavedCarFn(car.id);
+    toggleSavedCar(car.id);
   };
 
-  useEffect(() => {
-                //@ts-ignore
-
-    if (toggleResult?.success && toggleResult?.saved !== isSaved) {
-                //@ts-ignore
-
-      setSaved(toggleResult?.saved);
-                //@ts-ignore
-
-      toast.success(toggleResult?.message);
-    }
-  }, [toggleResult, isSaved]);
-  useEffect(() => {
-    if(toggleError){
-      toast.error("Failed to update favourites")
-    }
-  },[toggleError])
   return (
     <Card className="overflow-hidden hover:shadow-lg transition group py-0">
       <div className="relative h-48">
         {car.images && car.images.length > 0 ? (
-          <div>
-            <Image
-              src={car.images[0]}
-              alt={`${car.make} ${car.model}`}
-              fill
-              className="object-cover group-hover:scale-105 transition duration-300"
-            />
-          </div>
+          <Image
+            src={car.images[0]}
+            alt={`${car.make} ${car.model}`}
+            fill
+            className="object-cover group-hover:scale-105 transition duration-300"
+          />
         ) : (
           <div className="w-full h-full bg-gray-200 flex items-center justify-center">
             <CarIcon className="h-12 w-12 text-gray-400" />
@@ -94,20 +79,19 @@ const CarCard = ({ car }: { car: Car }) => {
       </div>
       <CardContent className="p-4">
         <div className="flex flex-col mb-2">
-          <h3 className="text-lg font-bold line-clamp-1 ">
+          <h3 className="text-lg font-bold line-clamp-1">
             {car.make} {car.model}
           </h3>
-                {/* @ts-ignore */}
           <span className="text-xl font-bold text-blue-600">
             Rs {car.price.toString()}
           </span>
         </div>
-        <div className=" text-gray-600 mb-2 flex items-center">
+        <div className="text-gray-600 mb-2 flex items-center">
           <span>{car.year}</span>
           <span className="mx-2">.</span>
-          <span className="mx-2">{car.transmission}</span>
+          <span>{car.transmission}</span>
           <span className="mx-2">.</span>
-          <span className="mx-2">{car.fuelType}</span>
+          <span>{car.fuelType}</span>
         </div>
         <div className="flex flex-wrap gap-1 mb-4">
           <Badge variant={"outline"} className="bg-gray-50">
@@ -123,7 +107,7 @@ const CarCard = ({ car }: { car: Car }) => {
         <div className="flex justify-between">
           <Button
             onClick={() => router.push(`/cars/${car.id}`)}
-            className=" flex-1"
+            className="flex-1"
           >
             View Car
           </Button>

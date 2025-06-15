@@ -7,9 +7,10 @@ import { revalidatePath } from "next/cache";
 export async function getDealershipInfo() {
   try {
     const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
 
-    // Get the dealership record
     let dealership = await db.dealerShipInfo.findFirst({
       include: {
         workingHours: {
@@ -20,55 +21,18 @@ export async function getDealershipInfo() {
       },
     });
 
-    // If no dealership exists, create a default one
     if (!dealership) {
       dealership = await db.dealerShipInfo.create({
         data: {
-          // Default values will be used from schema
           workingHours: {
             create: [
-              {
-                dayOfWeek: "MONDAY",
-                openTime: "09:00",
-                closeTime: "18:00",
-                isOpen: true,
-              },
-              {
-                dayOfWeek: "TUESDAY",
-                openTime: "09:00",
-                closeTime: "18:00",
-                isOpen: true,
-              },
-              {
-                dayOfWeek: "WEDNESDAY",
-                openTime: "09:00",
-                closeTime: "18:00",
-                isOpen: true,
-              },
-              {
-                dayOfWeek: "THURSDAY",
-                openTime: "09:00",
-                closeTime: "18:00",
-                isOpen: true,
-              },
-              {
-                dayOfWeek: "FRIDAY",
-                openTime: "09:00",
-                closeTime: "18:00",
-                isOpen: true,
-              },
-              {
-                dayOfWeek: "SATURDAY",
-                openTime: "10:00",
-                closeTime: "16:00",
-                isOpen: true,
-              },
-              {
-                dayOfWeek: "SUNDAY",
-                openTime: "10:00",
-                closeTime: "16:00",
-                isOpen: false,
-              },
+              { dayOfWeek: "MONDAY", openTime: "09:00", closeTime: "18:00", isOpen: true },
+              { dayOfWeek: "TUESDAY", openTime: "09:00", closeTime: "18:00", isOpen: true },
+              { dayOfWeek: "WEDNESDAY", openTime: "09:00", closeTime: "18:00", isOpen: true },
+              { dayOfWeek: "THURSDAY", openTime: "09:00", closeTime: "18:00", isOpen: true },
+              { dayOfWeek: "FRIDAY", openTime: "09:00", closeTime: "18:00", isOpen: true },
+              { dayOfWeek: "SATURDAY", openTime: "10:00", closeTime: "16:00", isOpen: true },
+              { dayOfWeek: "SUNDAY", openTime: "10:00", closeTime: "16:00", isOpen: false },
             ],
           },
         },
@@ -82,7 +46,6 @@ export async function getDealershipInfo() {
       });
     }
 
-    // Format the data
     return {
       success: true,
       data: {
@@ -91,8 +54,9 @@ export async function getDealershipInfo() {
         updatedAt: dealership.updatedAt.toISOString(),
       },
     };
-  } catch (error:any) {
-    throw new Error("Error fetching dealership info:" + error.message);
+  } catch (error: any) {
+    console.error("Error fetching dealership info:", error);
+    return { success: false, error: "Error fetching dealership info: " + error.message };
   }
 }
 
@@ -102,16 +66,11 @@ export async function saveWorkingHours(workingHours: any[]) {
     if (!userId) return { success: false, error: "Unauthorized" };
 
     const user = await db.user.findUnique({
-      where: {
-        clerkUserId: userId,
-      },
+      where: { clerkUserId: userId },
     });
 
     if (!user || user.role !== "ADMIN") {
-      return {
-        success: false,
-        error: "Unauthorized: Admin access is required",
-      };
+      return { success: false, error: "Unauthorized: Admin access is required" };
     }
 
     const dealership = await db.dealerShipInfo.findFirst();
@@ -120,9 +79,7 @@ export async function saveWorkingHours(workingHours: any[]) {
     }
 
     await db.workingHour.deleteMany({
-      where: {
-        dealershipId: dealership.id,
-      },
+      where: { dealershipId: dealership.id },
     });
 
     for (const hour of workingHours) {
@@ -142,14 +99,10 @@ export async function saveWorkingHours(workingHours: any[]) {
 
     return { success: true };
   } catch (error: any) {
-    console.error(error);
-    return {
-      success: false,
-      error: "Error saving working hours: " + error.message,
-    };
+    console.error("Error saving working hours:", error);
+    return { success: false, error: "Error saving working hours: " + error.message };
   }
 }
-
 
 export async function getUsers() {
   try {
@@ -159,22 +112,15 @@ export async function getUsers() {
     }
 
     const user = await db.user.findUnique({
-      where: {
-        clerkUserId: userId,
-      },
+      where: { clerkUserId: userId },
     });
 
     if (!user || user.role !== "ADMIN") {
-      return {
-        success: false,
-        error: "Unauthorized: Admin access is required",
-      };
+      return { success: false, error: "Unauthorized: Admin access is required" };
     }
 
     const users = await db.user.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
     });
 
     return {
@@ -186,12 +132,12 @@ export async function getUsers() {
       })),
     };
   } catch (error: any) {
-    console.error(error);
+    console.error("Error fetching users:", error);
     return { success: false, error: "Error fetching users: " + error.message };
   }
 }
 
-export async function updateUserRole(userId: string, role: any ) {
+export async function updateUserRole(userId: string, role: any) {
   try {
     const { userId: adminId } = await auth();
     if (!adminId) {
@@ -199,9 +145,7 @@ export async function updateUserRole(userId: string, role: any ) {
     }
 
     const admin = await db.user.findUnique({
-      where: {
-        clerkUserId: adminId,
-      },
+      where: { clerkUserId: adminId },
     });
 
     if (!admin || admin.role !== "ADMIN") {
@@ -209,22 +153,15 @@ export async function updateUserRole(userId: string, role: any ) {
     }
 
     await db.user.update({
-      where: {
-        id: userId, // ✅ Update the **provided userId**, not the admin
-      },
-      data: {
-        role,
-      },
+      where: { id: userId },
+      data: { role },
     });
 
     revalidatePath("/admin/settings");
 
     return { success: true };
   } catch (error: any) {
-    console.error(error);
-    return {
-      success: false,
-      error: "Error updating user role: " + error.message,
-    };
+    console.error("Error updating user role:", error);
+    return { success: false, error: "Error updating user role: " + error.message };
   }
 }
