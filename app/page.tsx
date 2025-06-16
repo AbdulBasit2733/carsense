@@ -1,3 +1,4 @@
+import { getSavedCars } from "@/actions/car-listing";
 import { getFeaturedCars } from "@/actions/home";
 import HomeSearch from "@/components/home-search";
 import OurTeamsSection from "@/components/our-teams";
@@ -12,6 +13,7 @@ import Link from "next/link";
 const Home = async () => {
   const result = await getFeaturedCars();
   const featuredCars = result.success ? result.data : [];
+  const savedCars = await getSavedCars();
 
   return (
     <div className="pt-20 flex flex-col">
@@ -57,6 +59,7 @@ const Home = async () => {
               featuredCars.map((item: any, i: number) => (
                 <BentoGridItem
                   id={item.id}
+                  // saved={savedCars && savedCars.success && savedCars?.data[i].car.id}
                   key={item.id || i}
                   title={`${item.make} ${item.model}`}
                   price={item.price}

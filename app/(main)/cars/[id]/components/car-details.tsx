@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import useFetch from "@/hooks/use-fetch";
 import { useAuth } from "@clerk/nextjs";
 import {
   Calendar,
@@ -29,20 +28,59 @@ import { toast } from "sonner";
 import EMICalculator from "./emi-calculator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { format } from "date-fns";
-//@ts-ignore
+import { CarProps } from "@/types/types";
+import { useMutation } from "@tanstack/react-query";
 
-const CarDetails = ({ car, testDriveInfo }) => {
+export interface WorkingHour {
+  id: string;
+  dealershipId: string;
+  dayOfWeek: string; // e.g., "MONDAY", "TUESDAY"
+  openTime: string; // Format: "HH:MM"
+  closeTime: string; // Format: "HH:MM"
+  isOpen: boolean;
+  createdAt: string; // ISO Date string
+  updatedAt: string; // ISO Date string
+}
+
+export interface DealershipProps {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  createdAt: string; // ISO Date string
+  updatedAt: string; // ISO Date string
+  workingHours: WorkingHour[];
+  userTestDrive: any | null; // You can replace `any` with the proper type if you know its structure
+}
+
+const CarDetails = ({
+  car,
+  testDriveInfo,
+}: {
+  car: CarProps;
+  testDriveInfo: {
+    dealership: DealershipProps;
+    userTestDrive?: any;
+  };
+}) => {
+  console.log("testdrive", testDriveInfo);
+
   const router = useRouter();
   const { isSignedIn } = useAuth();
-  const [isFeatured, setIsFeatured] = useState(car.Featured);
+  const [isFeatured, setIsFeatured] = useState(car.featured);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const {
-    loading: savingCar,
-    fn: toggleSavedCarFn,
+    mutate: toggleSavedCarFn,
     data: toggleResult,
     error: toggleError,
-  } = useFetch(toggleSavedCars);
+    isPending: savingCar,
+  } = useMutation({
+    mutationFn: (carId: string) => toggleSavedCars(carId),
+  });
+
+  console.log("toggle Result", toggleResult);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -65,7 +103,13 @@ const CarDetails = ({ car, testDriveInfo }) => {
     navigator.clipboard.writeText(window.location.href);
     toast.success("Link copied to clipboard");
   };
-  const formatCurrency = () => {};
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString("en-US", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    });
+  };
 
   const handleBookTestDrive = () => {
     if (!isSignedIn) {
@@ -76,13 +120,8 @@ const CarDetails = ({ car, testDriveInfo }) => {
     router.push(`/test-drive/${car.id}`);
   };
   useEffect(() => {
-    //@ts-ignore
-
     if (toggleResult?.success && toggleResult?.saved !== isFeatured) {
-      //@ts-ignore
-
-      setIsFeatured(toggleResult?.saved);
-      //@ts-ignore
+      setIsFeatured(toggleResult?.saved ?? false);
 
       toast.success(toggleResult?.message);
     }
@@ -127,8 +166,6 @@ const CarDetails = ({ car, testDriveInfo }) => {
           </div>
           {car.images && car.images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-2">
-              {/* @ts-ignore */}
-
               {car.images.map((image, index) => {
                 return (
                   <div
@@ -185,8 +222,6 @@ const CarDetails = ({ car, testDriveInfo }) => {
             {car.year} {car.make} {car.model}
           </h1>
           <div className="text-2xl font-bold text-blue-600">
-            {/* @ts-ignore */}
-
             {formatCurrency(car.price)}
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 my-6">
@@ -215,8 +250,6 @@ const CarDetails = ({ car, testDriveInfo }) => {
                   <div className="text-sm text-gray-600">
                     Estimated Monthly Payment:{" "}
                     <span className="font-bold text-gray-900">
-                      {/* @ts-ignore */}
-
                       {formatCurrency(car.price / 60)}
                     </span>
                     for 60 Months
@@ -391,7 +424,6 @@ const CarDetails = ({ car, testDriveInfo }) => {
               <div className="space-y-2">
                 {testDriveInfo.dealership?.workingHours
                   ? testDriveInfo.dealership.workingHours
-                      //@ts-ignore
 
                       .sort((a, b) => {
                         const days = [
@@ -407,7 +439,6 @@ const CarDetails = ({ car, testDriveInfo }) => {
                           days.indexOf(a.dayOfWeek) - days.indexOf(b.dayOfWeek)
                         );
                       })
-                      //@ts-ignore
 
                       .map((day) => (
                         <div

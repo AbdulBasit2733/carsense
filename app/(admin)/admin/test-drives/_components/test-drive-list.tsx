@@ -19,69 +19,121 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useFetch from "@/hooks/use-fetch";
+import { CarProps } from "@/types/types";
+import { useMutation } from "@tanstack/react-query";
 import { CalendarRange, Loader2, Search } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+export interface TestDriveBooking {
+  id: string;
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  notes: string;
+  status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" | "NO_SHOW";
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  carId: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    imageUrl: string;
+  };
+  car: CarProps;
+}
+
+export interface TestDriveResponse {
+  success: boolean;
+  message: string;
+  data: TestDriveBooking[];
+}
 
 const TestDriveList = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
   const {
-    loading: fetchingTestDrives,
-    fn: fetchTestDrives,
+    mutate: fetchTestDrives,
     data: testDrivesData,
+    isPending: fetchingTestDrives,
     error: testDrivesError,
-  } = useFetch(getAdminTestDrives);
+  } = useMutation<TestDriveResponse, Error, { search: string; status: string }>(
+    {
+      mutationFn: async ({ search, status }) => {
+        const result = await getAdminTestDrives({ search, status });
+        if (!("data" in result) || !Array.isArray(result.data)) {
+          return {
+            success: result.success,
+            message: result.message,
+            data: [],
+          };
+        }
+        return result as TestDriveResponse;
+      },
+    }
+  );
+
+  console.log("Drive Data", testDrivesData);
+
+  // 2. Update Status
   const {
-    loading: updatingStatus,
-    fn: updateStatusFn,
+    mutate: updateStatus,
+    isPending: updatingStatus,
     data: updateResult,
     error: updateError,
-  } = useFetch(updateTestDriveStatus);
+  } = useMutation({
+    mutationFn: (args: { id: string; status: string }) =>
+      updateTestDriveStatus(args.id, args.status),
+  });
+
+  // 3. Cancel Booking
   const {
-    loading: cancelling,
-    fn: cancelTestDriveFn,
+    mutate: cancelBookingFn,
+    isPending: cancelling,
     data: cancelResult,
     error: cancelError,
-  } = useFetch(cancelTestDrive);
-  //@ts-ignore
+  } = useMutation({
+    mutationFn: (bookingId: string) => cancelTestDrive(bookingId),
+  });
 
-  const handleSearchSubmit = (e: any) => {
-    e.preventDefault();
-    fetchTestDrives({ search, status: statusFilter });
-  };
-  //@ts-ignore
-
-  const handleUpdateStatus = async (bookingId, newStatus) => {
-    if (newStatus) {
-      await updateStatusFn(bookingId, newStatus);
-    }
-  };
-
+  // Trigger fetch on mount and whenever filters change
   useEffect(() => {
-    //@ts-ignore
+    fetchTestDrives({ search, status: statusFilter });
+  }, [search, statusFilter]);
 
+  // React to update/cancel results
+  useEffect(() => {
     if (updateResult?.success) {
       toast.success("Test drive status updated successfully");
       fetchTestDrives({ search, status: statusFilter });
     }
-    //@ts-ignore
-
+    if (updateError) {
+      toast.error("failed to update test drive");
+    }
     if (cancelResult?.success) {
       toast.success("Test drive cancelled successfully");
       fetchTestDrives({ search, status: statusFilter });
     }
-
     if (cancelError) {
       toast.error("Failed to cancel test drive");
     }
-  }, [updateResult, cancelResult]);
+    if(testDrivesError){
+      toast.error("Failed to fetch test drives")
+    }
+  }, [updateResult, cancelResult, cancelError, testDrivesError, updateError]);
 
-  useEffect(() => {
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     fetchTestDrives({ search, status: statusFilter });
-  }, [search, statusFilter]);
+  };
+
+  const handleUpdateStatus = (id: string, newStatus: string) => {
+    if (newStatus) updateStatus({ id, status: newStatus });
+  };
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center justify-between">
@@ -130,20 +182,18 @@ const TestDriveList = () => {
           ) : (
             <div className="space-y-4">
               {testDrivesData &&
-                //@ts-ignore
-
                 testDrivesData?.data?.map((booking) => (
                   <div key={booking.id} className="relative">
                     <TestDriveCard
                       booking={booking}
-                      onCancel={cancelTestDriveFn}
+                      onCancel={async (bookingId: string) => {
+                        await cancelBookingFn(bookingId);
+                      }}
                       showActions={["PENDING", "CONFIRMED"].includes(
                         booking.status
                       )}
                       isAdmin={true}
                       isCancelling={cancelling}
-                      //@ts-ignore
-
                       renderStatusSelector={() => (
                         <Select
                           value={booking.status}

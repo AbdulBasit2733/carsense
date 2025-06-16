@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -13,7 +12,6 @@ import {
 import { Filter, Sliders, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import CarFilterControls from "./filter-control";
 import {
   Select,
   SelectContent,
@@ -21,14 +19,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import CarFilterControls from "./filter-control";
+export interface CarFilterData {
+  bodyTypes: string[];
+  fuelTypes: string[];
+  makes: string[];
+  priceRange: {
+    min: number;
+    max: number;
+  };
+  transmissions: string[];
+}
+export interface CarFilterControlsProps {
+  filters: CarFilterData;
+  currentFilters: {
+    make: string;
+    bodyType: string;
+    fuelType: string;
+    transmission: string;
+    priceRangeMin: number;
+    priceRangeMax: number;
+  };
+  onFilterChange: (filterName: FilterName, value: any) => void;
+  onClearFilter: (filterName: FilterName) => void;
+}
 
-import { CarFilterProps, FilterName } from "./filters-type";
-import { CarFilterData } from "@/types/filters";
+
+type FilterName = 'make' | 'fuelType' | 'bodyType' | 'transmission' | 'priceRangeMin' | 'priceRangeMax';
+
 
 const CarFilters = ({ filters }: { filters: CarFilterData }) => {
   // console.log(filters);
 
-  const router = useRouter();
+ const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -37,25 +60,25 @@ const CarFilters = ({ filters }: { filters: CarFilterData }) => {
   const currentFuelType = searchParams.get("fuelType") || "";
   const currentTransmission = searchParams.get("transmission") || "";
   const currentMinPrice = searchParams.get("minPrice")
-    ? parseInt(searchParams.get("minPrice"))
+    ? parseInt(searchParams.get("minPrice") || "0")
     : filters.priceRange.min;
   const currentMaxPrice = searchParams.get("maxPrice")
-    ? parseInt(searchParams.get("maxPrice"))
+    ? parseInt(searchParams.get("maxPrice") || "0")
     : filters.priceRange.max;
 
   const currentSortBy = searchParams.get("sortBy") || "newest";
 
-  const [make, setMake] = useState(currentMake);
-  const [fuelType, setFuelType] = useState(currentFuelType);
-  const [bodyType, setBodyType] = useState(currentBodyType);
-  const [transmission, setTransmission] = useState(currentTransmission);
-  const [priceRange, setPriceRange] = useState([
+  const [make, setMake] = useState<string>(currentMake);
+  const [fuelType, setFuelType] = useState<string>(currentFuelType);
+  const [bodyType, setBodyType] = useState<string>(currentBodyType);
+  const [transmission, setTransmission] = useState<string>(currentTransmission);
+  const [priceRange, setPriceRange] = useState<[number, number]>([
     currentMinPrice,
     currentMaxPrice,
   ]);
-  const [sortBy, setSortBy] = useState(currentSortBy);
+  const [sortBy, setSortBy] = useState<string>(currentSortBy);
+  const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
 
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const activeFilterCount = [
     make,
     bodyType,
@@ -79,29 +102,49 @@ const CarFilters = ({ filters }: { filters: CarFilterData }) => {
       case "make":
         setMake(value);
         break;
-
       case "fuelType":
         setFuelType(value);
         break;
-
       case "bodyType":
         setBodyType(value);
         break;
-
       case "transmission":
         setTransmission(value);
         break;
-      case "priceRangeMax":
-        setPriceRange(value);
-        break;
       case "priceRangeMin":
-        setPriceRange(value);
+        setPriceRange([value, priceRange[1]]);
+        break;
+      case "priceRangeMax":
+        setPriceRange([priceRange[0], value]);
+        break;
+      default:
         break;
     }
   };
 
   const handleClearFilter = (filterName: FilterName) => {
-    handleFilterChange(filterName, "");
+    switch (filterName) {
+      case "make":
+        setMake("");
+        break;
+      case "fuelType":
+        setFuelType("");
+        break;
+      case "bodyType":
+        setBodyType("");
+        break;
+      case "transmission":
+        setTransmission("");
+        break;
+      case "priceRangeMin":
+        setPriceRange([filters.priceRange.min, priceRange[1]]);
+        break;
+      case "priceRangeMax":
+        setPriceRange([priceRange[0], filters.priceRange.max]);
+        break;
+      default:
+        break;
+    }
   };
 
   const clearFilters = () => {
@@ -168,7 +211,7 @@ const CarFilters = ({ filters }: { filters: CarFilterData }) => {
   ]);
 
   return (
-    <div className="flex lg:flex-col justify-between gap-4">
+    <div className="flex lg:flex-col justify-start gap-4">
       {/* mobile filters */}
       <div className="lg:hidden mb-4">
         <div className="flex items-center">
@@ -215,6 +258,7 @@ const CarFilters = ({ filters }: { filters: CarFilterData }) => {
           </Sheet>
         </div>
       </div>
+
       {/* sort selection */}
       <Select
         value={sortBy}
@@ -230,18 +274,9 @@ const CarFilters = ({ filters }: { filters: CarFilterData }) => {
         </SelectTrigger>
         <SelectContent>
           {[
-            {
-              value: "newest",
-              label: "Newest First",
-            },
-            {
-              value: "priceAsc",
-              label: "Price: Low to High",
-            },
-            {
-              value: "priceDesc",
-              label: "Price: High to Low",
-            },
+            { value: "newest", label: "Newest First" },
+            { value: "priceAsc", label: "Price: Low to High" },
+            { value: "priceDesc", label: "Price: High to Low" },
           ].map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}

@@ -1,7 +1,7 @@
 "use client";
 
 import { getCars } from "@/actions/car-listing";
-import useFetch from "@/hooks/use-fetch";
+import { useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import CarListingsLoading from "./car-listings-loading";
@@ -10,10 +10,25 @@ import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import CarCard from "@/components/CarCard";
+import { CarProps } from "@/types/types";
+
+export interface Pagination {
+  limit: number;
+  page: number;
+  pages: number;
+  total: number;
+}
+
+export interface GetCarsResponse {
+  success: boolean;
+  data: CarProps[];
+  pagination: Pagination;
+}
+
+
 
 const CarListing = () => {
   const searchParams = useSearchParams();
-  // const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 6;
 
@@ -22,26 +37,46 @@ const CarListing = () => {
   const bodyType = searchParams.get("bodyType") || "";
   const fuelType = searchParams.get("fuelType") || "";
   const transmission = searchParams.get("transmission") || "";
-  const minPrice = searchParams.get("minPrice") || 0;
-  const maxPrice = searchParams.get("maxPrice") || Number.MAX_SAFE_INTEGER;
+  const minPrice = parseInt(searchParams.get("minPrice") || "0");
+  const maxPrice = parseInt(
+    searchParams.get("maxPrice") || `${Number.MAX_SAFE_INTEGER}`
+  );
   const sortBy = searchParams.get("sortBy") || "newest";
   const page = parseInt(searchParams.get("page") || "1");
 
-  const { loading, fn: fetchCars, data: result, error } = useFetch(getCars);
-  // console.log("fetch cars", result);
+  const {
+    mutate,
+    data: result,
+    error,
+    isPending,
+  } = useMutation<GetCarsResponse, Error, void, unknown>({
+    mutationFn: async () => {
+      const res = await getCars({
+        search,
+        make,
+        bodyType,
+        fuelType,
+        transmission,
+        minPrice,
+        maxPrice,
+        sortBy,
+        page,
+        limit,
+      });
+      // Normalize the response to always have data and pagination
+      if (res.success && res.data && res.pagination) {
+        return res as GetCarsResponse;
+      }
+      return {
+        success: false,
+        data: [],
+        pagination: { total: 0, page: 1, limit, pages: 1 },
+      };
+    },
+  });
 
   useEffect(() => {
-    fetchCars(
-      search,
-      make,
-      bodyType,
-      fuelType,
-      transmission,
-      minPrice,
-      maxPrice,
-      sortBy,
-      page
-    );
+    mutate();
   }, [
     search,
     make,
@@ -54,30 +89,29 @@ const CarListing = () => {
     page,
   ]);
 
-  if (loading && !result) {
+  if (isPending && !result) {
     return <CarListingsLoading />;
   }
-  //@ts-ignore
 
-  if (error || (!result && !result?.success)) {
-    <Alert variant={"destructive"}>
-      <Info className="h-4 w-4" />
-      <AlertTitle>Error</AlertTitle>
-      <AlertDescription>
-        Failed to load cars please try again later !
-      </AlertDescription>
-    </Alert>;
+  if (error || !result || !result.success) {
+    return (
+      <Alert variant={"destructive"}>
+        <Info className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          Failed to load cars, please try again later!
+        </AlertDescription>
+      </Alert>
+    );
   }
-  //@ts-ignore
 
   if (!result || !result?.data) {
     return null;
   }
-  const { data: cars, pagination } = result;
-  // console.log(cars);
-  //@ts-ignore
 
-  if (cars && cars?.length === 0) {
+  const { data: cars, pagination } = result;
+
+  if (cars && cars.length === 0) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center text-center p-8 border rounded-lg bg-gray-50">
         <div className="bg-gray-100 p-4 rounded-full mb-4">
@@ -101,17 +135,16 @@ const CarListing = () => {
         <p className="text-gray-600">
           Showing{" "}
           <span className="font-medium">
-            {/* @ts-ignore */}
-            {(page - 1) * limit + 1}-{Math.min(page * limit, pagination?.total)}
+            {(page - 1) * limit + 1}-{Math.min(page * limit, pagination.total)}
           </span>{" "}
-          {/* @ts-ignore */}
           of <span className="font-medium">{pagination.total}</span> cars
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* @ts-ignore */}
-        {cars && cars?.map((car) => <CarCard key={car.id} car={car} />)}
+        {cars.map((car) => (
+          <CarCard key={car.id} car={car} />
+        ))}
       </div>
     </div>
   );

@@ -37,9 +37,7 @@ export default function EMICalculator({price=1000}) {
     calculateEMI();
   }, [calculateEMI]);
 
-                //@ts-ignore
-
-  const formatCurrency = (value) => {
+  const formatCurrency = (value:any) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",

@@ -3,14 +3,38 @@ import { cancelTestDrive } from "@/actions/test-drive";
 import TestDriveCard from "@/components/test-drive-card";
 import { Button } from "@/components/ui/button";
 import useFetch from "@/hooks/use-fetch";
+import { BookingStatusProps, CarProps } from "@/types/types";
 import { Calendar } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-//@ts-ignore
-const ReservationsList = ({ initialData }) => {
-    // console.log("Initial Data", initialData);
-    
+export interface ReservationDataProps {
+  id: string;
+  bookingDate: string; // ISO date string
+  startTime: string;
+  endTime: string;
+  notes: string;
+  status: BookingStatusProps;
+  carId: string;
+  car: CarProps;
+  user?:{
+    name:string;
+    email:string
+  }
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+}
+
+const ReservationsList = ({
+  initialData,
+}: {
+  initialData: {
+    success: boolean;
+    data: ReservationDataProps[];
+  };
+}) => {
+  console.log("Initial Data", initialData);
+
   const {
     loading: cancelling,
     fn: cancelBookingFn,
@@ -19,21 +43,17 @@ const ReservationsList = ({ initialData }) => {
 
   const upcomingBookings =
     initialData &&
-    initialData?.data?.filter(
-      //@ts-ignore
-      (booking) =>
+    initialData?.data?.filter((booking) =>
       ["PENDING", "CONFIRMED"].includes(booking.status)
     );
 
   const pastBookings =
     initialData &&
-    initialData?.data?.filter(
-      //@ts-ignore
-      (booking) =>
+    initialData?.data?.filter((booking) =>
       ["COMPLETED", "CANCELED", "NO_SHOW"].includes(booking.status)
     );
 
-  const handleCancelBooking = async (bookingId: any) => {
+  const handleCancelBooking = async (bookingId:string) => {
     await cancelBookingFn(bookingId);
   };
   if (initialData && initialData?.data?.length === 0) {
@@ -63,9 +83,7 @@ const ReservationsList = ({ initialData }) => {
         ) : (
           <div>
             {upcomingBookings &&
-              upcomingBookings.map(
-                //@ts-ignore
-                (booking) => (
+              upcomingBookings.map((booking) => (
                 <TestDriveCard
                   key={booking.id}
                   booking={booking}
@@ -82,12 +100,7 @@ const ReservationsList = ({ initialData }) => {
           <h2 className="text-2xl font-bold mb-4">Past Test Drive</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {pastBookings &&
-              pastBookings.map(
-                //@ts-ignore
-                
-                (booking) => (
-                //@ts-ignore
-
+              pastBookings.map((booking) => (
                 <TestDriveCard
                   key={booking.id}
                   booking={booking}

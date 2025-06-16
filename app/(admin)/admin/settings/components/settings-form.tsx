@@ -38,6 +38,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Day names for display
 const DAYS = [
@@ -50,7 +51,81 @@ const DAYS = [
   { value: "SUNDAY", label: "Sunday" },
 ];
 
+export interface WorkingHour {
+  id: string;
+  dealershipId: string;
+  dayOfWeek: string; // e.g., "MONDAY"
+  openTime: string; // e.g., "09:00"
+  closeTime: string; // e.g., "18:00"
+  isOpen: boolean;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
+export interface DealershipInfo {
+  id: string;
+  name: string;
+  address: string;
+  email: string;
+  phone: string;
+  createdAt: string;
+  updatedAt: string;
+  workingHours: WorkingHour[];
+}
+
+export interface UserProps {
+  id: string;
+  clerkUserId: string;
+  name: string | null;
+  email: string;
+  imageUrl: string | null;
+  phone: string | null;
+  role: "ADMIN" | "USER"; // you can adjust roles as per your app
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DealershipInfoResponse {
+  success: boolean;
+  data: DealershipInfo;
+}
+
+export interface UsersResponse {
+  success: boolean;
+  data: UserProps[];
+}
+
+export interface WorkingHour {
+  id: string;
+  dealershipId: string;
+  dayOfWeek: string; // e.g., "MONDAY"
+  openTime: string;  // e.g., "09:00"
+  closeTime: string; // e.g., "18:00"
+  isOpen: boolean;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
+export interface DealershipSettings {
+  id: string;
+  name: string;
+  address: string;
+  email: string;
+  phone: string;
+  createdAt: string;
+  updatedAt: string;
+  workingHours: WorkingHour[];
+}
+
+export interface DealershipSettingsResponse {
+  success: boolean;
+  data: DealershipSettings;
+}
+
+
 const SettingsForm = () => {
+  const queryClient = useQueryClient();
+
   const [workingHours, setWorkingHours] = useState(
     DAYS.map((day) => ({
       dayOfWeek: day.value,
@@ -62,133 +137,103 @@ const SettingsForm = () => {
   const [userSearch, setUserSearch] = useState("");
 
   const {
-    loading: fetchingSettings,
-    fn: fetchDealershipInfo,
     data: settingsData,
     error: settingsError,
-  } = useFetch(getDealershipInfo);
-                //@ts-ignore
+    isLoading: fetchingSettings,
+  } = useQuery({
+    queryKey: ["dealership-info"],
+    queryFn: getDealershipInfo,
+  });
 
-  const handleRemoveAdmin = async (user) => {
+  const {
+    data: usersData,
+    error: usersError,
+    isLoading: fetchingUsers,
+  } = useQuery({
+    queryKey: ["users"],
+    queryFn: getUsers,
+  });
+
+  const {
+    mutate: saveHours,
+    isPending: savingHours,
+    data: saveResult,
+    error: saveError,
+  } = useMutation({
+    mutationFn: saveWorkingHours,
+    onSuccess: () => {
+      toast.success("Working Hours saved successfully");
+      queryClient.invalidateQueries({ queryKey: ["dealership-info"] });
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to save working hours: ${error.message}`);
+    },
+  });
+
+  const {
+    mutate: updateRole,
+    isPending: updatingRole,
+    data: updateRoleResult,
+    error: updateRoleError,
+  } = useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
+      updateUserRole(userId, role),
+    onSuccess: () => {
+      toast.success("User role updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to update user role: ${error.message}`);
+    },
+  });
+
+  const handleWorkingHourChange = (
+      index: number,
+      field: string,
+      value: string | boolean
+    ) => {
+      const updatedHours = [...workingHours];
+      updatedHours[index] = {
+        ...updatedHours[index],
+        [field]: value,
+      };
+      setWorkingHours(updatedHours);
+    };
+
+  const handleSaveHours = () => {
+    saveHours(workingHours);
+  };
+
+  const handleRemoveAdmin = (user: UserProps) => {
     if (
       confirm(
         `Are you sure you want to remove admin privileges to ${
           user.name || user.email
-        }? They will no longer be able to access the admin dashboard`
+        }? They will no longer be able to access the admin dashboard.`
       )
     ) {
-      await updateRole(user.id, "USER");
+      updateRole({ userId: user.id, role: "USER" });
     }
   };
-                //@ts-ignore
 
-  const handleMakeAdmin = async (user) => {
+  const handleMakeAdmin = (user: UserProps) => {
     if (
       confirm(
         `Are you sure you want to give admin privileges to ${
           user.name || user.email
-        }? Admin users can manage all aspects of the dealership`
+        }? Admin users can manage all aspects of the dealership.`
       )
     ) {
-      await updateRole(user.id, "ADMIN");
+      updateRole({ userId: user.id, role: "ADMIN" });
     }
   };
 
-  const {
-    loading: savingHours,
-    fn: saveHours,
-    data: saveResult,
-    error: saveError,
-  } = useFetch(saveWorkingHours);
-  const {
-    loading: fetchingUsers,
-    fn: fetchUsers,
-    data: usersData,
-    error: usersError,
-  } = useFetch(getUsers);
-  // console.log(usersData);
-  
-  const {
-    loading: updatingRole,
-    fn: updateRole,
-    data: updateRoleResult,
-    error: updateRoleError,
-  } = useFetch(updateUserRole);
-
   useEffect(() => {
-    fetchDealershipInfo();
-    fetchUsers();
-  }, []);
-                //@ts-ignore
-
-  const handleWorkingHourChange = (index, field, value) => {
-    const updatedHours = [...workingHours];
-    updatedHours[index] = {
-      ...updatedHours[index],
-      [field]: value,
-    };
-    setWorkingHours(updatedHours);
-  };
-
-  const handleSaveHours = async () => {
-    await saveHours(workingHours);
-  };
-                //@ts-ignore
-
-  const filteredUser = usersData && usersData?.data
-                //@ts-ignore
-
-    ? usersData?.data?.filter(
-                //@ts-ignore
-
-        (user) =>
-          user.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
-          user.email.toLowerCase().includes(userSearch.toLowerCase())
-      )
-    : [];
-
-  useEffect(() => {
-    if (saveResult) {
-      toast.success("Working Hours sved successfully");
-      fetchDealershipInfo();
-    }
-    if (updateRoleResult) {
-      toast.success("User role updated successfully");
-      fetchUsers();
-    }
-  }, [saveResult, updateRoleResult]);
-
-  useEffect(() => {
-    if (settingsError) {
-      toast.error("Failed to load dealerships settings");
-    }
-    if (saveError) {
-                //@ts-ignore
-
-      toast.error(`faild to save working hours: ${saveError?.message}`);
-    }
-    if (usersError) {
-      toast.error("Failed to load users");
-    }
-    if (updateRoleError) {
-                //@ts-ignore
-
-      toast.error(`Failed to update user role: ${updateRoleError?.message}`);
-    }
-  }, [settingsError, saveError, usersError, updateRoleError]);
-
-  useEffect(() => {
-    if (settingsData && settingsData) {
-      const dealership = settingsData;
-                //@ts-ignore
-
-      if (dealership?.workingHours?.length > 0) {
+    if (settingsData && settingsData.success && settingsData.data) {
+      const dealership: DealershipInfo = settingsData.data;
+      if (dealership?.workingHours !== null) {
         const mappedHours = DAYS.map((day) => {
-                //@ts-ignore
-
           const hourData = dealership.workingHours.find(
-                //@ts-ignore
-
             (h) => h.dayOfWeek === day.value
           );
           if (hourData) {
@@ -199,7 +244,6 @@ const SettingsForm = () => {
               isOpen: hourData.isOpen,
             };
           }
-
           return {
             dayOfWeek: day.value,
             openTime: "09:00",
@@ -211,6 +255,24 @@ const SettingsForm = () => {
       }
     }
   }, [settingsData]);
+
+  const filteredUser =
+    usersData && usersData?.data
+      ? usersData?.data?.filter(
+          (user) =>
+            user.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
+            user.email.toLowerCase().includes(userSearch.toLowerCase())
+        )
+      : [];
+
+  useEffect(() => {
+    if (settingsError) toast.error("Failed to load dealership settings");
+    if (saveError)
+      toast.error(`Failed to save working hours: ${saveError.message}`);
+    if (usersError) toast.error("Failed to load users");
+    if (updateRoleError)
+      toast.error(`Failed to update user role: ${updateRoleError.message}`);
+  }, [settingsError, saveError, usersError, updateRoleError]);
 
   return (
     <div className="space-y-6">
@@ -345,8 +407,6 @@ const SettingsForm = () => {
                 <div className="py-12 flex justify-center">
                   <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                 </div>
-                //@ts-ignore
-
               ) : usersData && usersData?.data && filteredUser.length > 0 ? (
                 <>
                   <Table>
@@ -359,10 +419,7 @@ const SettingsForm = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      
-                      {filteredUser?.map(
-                //@ts-ignore
-                        (user) => {
+                      {filteredUser?.map((user) => {
                         return (
                           <TableRow key={user.id}>
                             <TableCell className="font-medium">

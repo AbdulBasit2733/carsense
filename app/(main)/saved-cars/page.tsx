@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import React from 'react'
 import SavedCarsList from './components/saved-cars-list'
+import { CarProps } from '@/types/types'
 
 const SavedCarsPage = async () => {
     const {userId} = await auth()
@@ -11,11 +12,12 @@ const SavedCarsPage = async () => {
     }
 
     const savedCarsResult = await getSavedCars();
+    const initialData: CarProps[] = (savedCarsResult && savedCarsResult.success && savedCarsResult.data) ? savedCarsResult.data : []
 
   return (
     <div className='container mx-auto px-4 py-12'>
         <h1 className='text-6xl mb-6 gradient-title'>Your Saved Cars</h1>
-        <SavedCarsList initialData={savedCarsResult} />
+        <SavedCarsList initialData={initialData} />
     </div>
   )
 }

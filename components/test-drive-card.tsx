@@ -15,21 +15,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-//@ts-ignore
+import { BookingStatusProps } from "@/types/types";
+import { ReservationDataProps } from "@/app/(main)/reservations/components/reservations-list";
 
-const formatTime = (timeString) => {
+const formatTime = (timeString: string) => {
   try {
     return format(parseISO(`2022-01-01T${timeString}`), "h:mm a");
   } catch (error) {
     return timeString;
   }
 };
-//@ts-ignore
 
-// Helper function for status badge
-const getStatusBadge = ({ status }) => {
-  // console.log(status);
-
+const getStatusBadge = (status:BookingStatusProps) => {
   switch (status) {
     case "PENDING":
       return <Badge className="bg-amber-100 text-amber-800">Pending</Badge>;
@@ -46,19 +43,27 @@ const getStatusBadge = ({ status }) => {
   }
 };
 
-//@ts-ignore
-const TestDriveCard = ({
-  //@ts-ignore
+interface TestDriveCardProps {
+  booking: ReservationDataProps;
+  onCancel?: (bookingId: string) => Promise<void>; // now accepts bookingId as argument
+  showActions?: boolean;
+  isPast?: boolean;
+  isAdmin?: boolean;
+  isCancelling?: boolean;
+  renderStatusSelector?: () => React.ReactNode; // should return ReactNode
+}
 
+const TestDriveCard = ({
   booking,
-  //@ts-ignore
   onCancel,
   showActions = true,
   isPast = false,
   isAdmin = false,
   isCancelling = false,
   renderStatusSelector = () => null,
-}) => {
+}: TestDriveCardProps) => {
+  console.log("Booking", booking);
+
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const handleCancel = async () => {
     if (!onCancel) return;

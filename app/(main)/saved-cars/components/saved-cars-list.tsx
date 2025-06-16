@@ -1,13 +1,17 @@
 import CarCard from "@/components/CarCard";
 import { Button } from "@/components/ui/button";
+import { CarProps } from "@/types/types";
 import { Heart } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 //@ts-ignore
-const SavedCarsList = ({ initialData }) => {
-  // console.log("Initial Saved Cars Data:", initialData);
+const SavedCarsList = ({ initialData }:{
+  initialData:CarProps[] | []
+}) => {
+  // console.log("Initial Saved Cars Data:", initialData)
 
-  if (!initialData?.data || initialData?.data.length === 0) {
+
+  if (!initialData || initialData?.length === 0) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center text-center p-8 border rounded-lg bg-gray-50">
         <div className="bg-gray-100 p-4 rounded-full mb-4">
@@ -28,9 +32,8 @@ const SavedCarsList = ({ initialData }) => {
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {initialData?.data &&
-          initialData?.data?.map(
-            //@ts-ignore
+        {initialData &&
+          initialData?.map(
             (car) => <CarCard key={car.id} car={car} />
           )}
       </div>
