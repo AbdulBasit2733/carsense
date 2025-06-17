@@ -64,7 +64,7 @@ const CarDetails = ({
     userTestDrive?: any;
   };
 }) => {
-  console.log("testdrive", testDriveInfo);
+  // console.log("testdrive", testDriveInfo);
 
   const router = useRouter();
   const { isSignedIn } = useAuth();
@@ -80,7 +80,7 @@ const CarDetails = ({
     mutationFn: (carId: string) => toggleSavedCars(carId),
   });
 
-  console.log("toggle Result", toggleResult);
+  // console.log("toggle Result", toggleResult);
 
   const handleShare = () => {
     if (navigator.share) {

@@ -12,7 +12,7 @@ export const metadata:Metadata = {
 
 const CarsPage = async () => {
   const filtersData = await getCarFilters();
-  console.log("filters Data", filtersData);
+  // console.log("filters Data", filtersData);
 
   if (!filtersData.success || !filtersData.data) {
     return (

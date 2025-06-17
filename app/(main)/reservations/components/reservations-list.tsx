@@ -7,23 +7,9 @@ import { BookingStatusProps, CarProps } from "@/types/types";
 import { Calendar } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import { ReservationDataProps } from "../page";
 
-export interface ReservationDataProps {
-  id: string;
-  bookingDate: string; // ISO date string
-  startTime: string;
-  endTime: string;
-  notes: string;
-  status: BookingStatusProps;
-  carId: string;
-  car: CarProps;
-  user?:{
-    name:string;
-    email:string
-  }
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
-}
+
 
 const ReservationsList = ({
   initialData,
@@ -33,7 +19,7 @@ const ReservationsList = ({
     data: ReservationDataProps[];
   };
 }) => {
-  console.log("Initial Data", initialData);
+  // console.log("Initial Data", initialData);
 
   const {
     loading: cancelling,

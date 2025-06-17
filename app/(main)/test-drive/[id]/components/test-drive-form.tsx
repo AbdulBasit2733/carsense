@@ -61,8 +61,8 @@ const TestDriveForm = ({
   car: CarProps;
   testDriveInfo: TestDriveInfoProps;
 }) => {
-  console.log("car", car);
-  console.log("test", testDriveInfo);
+  // console.log("car", car);
+  // console.log("test", testDriveInfo);
 
   const router = useRouter();
   const [availableTimeSlot, setAvailableTimeSlot] = useState<SlotsProps[]>([]);
@@ -462,12 +462,12 @@ const TestDriveForm = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Date:</span>
-                  {/* @ts-ignore */}
+                  {/*  */}
                   <span>{bookingDetails.date}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Time Slot:</span>
-                  {/* @ts-ignore */}
+                  {/*  */}
                   <span>{bookingDetails.timeSlot}</span>
                 </div>
                 <div className="flex justify-between">

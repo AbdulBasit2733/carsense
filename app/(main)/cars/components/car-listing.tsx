@@ -22,7 +22,7 @@ export interface Pagination {
 export interface GetCarsResponse {
   success: boolean;
   data: CarProps[];
-  pagination: Pagination;
+  pagination?: Pagination;
 }
 
 
@@ -109,7 +109,8 @@ const CarListing = () => {
     return null;
   }
 
-  const { data: cars, pagination } = result;
+  const { data: cars, pagination: rawPagination } = result;
+  const pagination = rawPagination || { total: 0, page: 1, limit, pages: 1 };
 
   if (cars && cars.length === 0) {
     return (

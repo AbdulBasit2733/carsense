@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { BookingStatusProps } from "@/types/types";
-import { ReservationDataProps } from "@/app/(main)/reservations/components/reservations-list";
+import { ReservationDataProps } from "@/app/(main)/reservations/page";
 
 const formatTime = (timeString: string) => {
   try {
@@ -62,7 +62,7 @@ const TestDriveCard = ({
   isCancelling = false,
   renderStatusSelector = () => null,
 }: TestDriveCardProps) => {
-  console.log("Booking", booking);
+  // console.log("Booking", booking);
 
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const handleCancel = async () => {

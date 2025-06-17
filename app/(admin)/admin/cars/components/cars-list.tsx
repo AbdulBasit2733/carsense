@@ -28,7 +28,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import useFetch from "@/hooks/use-fetch";
+import { CarProps } from "@/types/types";
+import { useMutation } from "@tanstack/react-query";
 import {
   CarIcon,
   Eye,
@@ -45,90 +46,104 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+interface AdminCarsDataProps {
+  success: boolean;
+  error?: string;
+  message?: string;
+  data: CarProps[] | [];
+}
+
 const CarsList = () => {
   const [search, setSearch] = useState("");
-  const [carToDelete, setCarToDelete] = useState(null);
+  const [carToDelete, setCarToDelete] = useState<CarProps | null>(null);
   const [deleteDiaglogOpen, setDeleteDialogOpen] = useState(false);
 
   const router = useRouter();
 
+  // Fetch Cars
   const {
+    mutate: fetchCarsFn,
     data: carsData,
+    isPending: carsLoading,
     error: carsError,
-    fn: fetchCarsFn,
-    loading: carsLoading,
-  } = useFetch(getCars);
+  } = useMutation<AdminCarsDataProps>({
+    mutationFn: async () => {
+      const res = await getCars({ search });
+      if (res.success && res.data) {
+        return res as AdminCarsDataProps;
+      }
+      return {
+        success: false,
+        data: [],
+      };
+    },
+  });
 
+  // console.log("Admin cars data", carsData);
+
+  // Delete Car
   const {
+    mutate: deleteCarFn,
     data: deleteResult,
+    isPending: deletingcar,
     error: deleteError,
-    fn: deleteCarFn,
-    loading: deletingcar,
-  } = useFetch(deleteCar);
+  } = useMutation({
+    mutationFn: deleteCar,
+  });
+
+  // Update Car Status
   const {
+    mutate: updateCarFn,
     data: updateResult,
+    isPending: updatingCar,
     error: updateError,
-    fn: updateCarFn,
-    loading: updatingCar,
-  } = useFetch(updateCarStatus);
+  } = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: any }) =>
+      updateCarStatus(id, payload),
+  });
 
+  // handle mutation success
   useEffect(() => {
-    //@ts-ignore
-
     if (deleteResult?.success) {
       toast.success("Car deleted successfully");
     }
-    if (updateResult) {
-      //@ts-ignore
-
-      if (updateResult?.success) {
-        toast.success("Car status updated successfully");
-        //@ts-ignore
-      } else if (updateResult.error) {
-        //@ts-ignore
-
-        toast.error(`Error: ${updateResult.error}`);
-      }
+    if (updateResult?.success) {
+      toast.success("Car status updated successfully");
+    } else if (!updateResult?.success) {
+      toast.error(`Error: ${updateResult?.message}`);
     }
-    fetchCarsFn(search);
-  }, [search, updateResult, deleteResult]);
+
+    fetchCarsFn();
+  }, [deleteResult, updateResult]);
+
+  // handle mutation errors
   useEffect(() => {
-    if (carsError) {
-      toast.error(`Error: ${carsError}`);
-    }
-    if (deleteError) {
-      toast.error(`Error: ${deleteError}`);
-    }
-    if (updateError) {
-      toast.error(`Error: ${updateError}`);
-    }
+    if (carsError) toast.error(`Error: ${carsError}`);
+    if (deleteError) toast.error(`Error: ${deleteError}`);
+    if (updateError) toast.error(`Error: ${updateError}`);
   }, [carsError, deleteError, updateError]);
 
   const handleSearchSubmit = (e: any) => {
     e.preventDefault();
-    fetchCarsFn(search);
+    fetchCarsFn();
   };
 
-  const handleDeleteCar = async (car: any) => {
+  const handleDeleteCar = async () => {
     if (!carToDelete) return;
-    //@ts-ignore
-
-    await deleteCarFn(carToDelete.id);
+    deleteCarFn(carToDelete.id);
     setDeleteDialogOpen(false);
     setCarToDelete(null);
   };
 
   const handleToggleFeatured = async (car: any) => {
-    await updateCarFn(car.id, { featured: !car.featured });
+    updateCarFn({ id: car.id, payload: { featured: !car.featured } });
   };
-  //@ts-ignore
 
-  const handleStatusUpdate = async (car, newStatus) => {
-    await updateCarFn(car.id, { status: newStatus });
+  const handleStatusUpdate = async (car: any, newStatus: string) => {
+    updateCarFn({ id: car.id, payload: { status: newStatus } });
   };
-  //@ts-ignore
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "AVAILABLE":
         return (
@@ -142,7 +157,6 @@ const CarsList = () => {
             UNAVAILABLE
           </Badge>
         );
-
       case "SOLD":
         return (
           <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
@@ -179,21 +193,15 @@ const CarsList = () => {
       </div>
       <Card>
         <CardContent className="p-0">
-          {/* @ts-ignore */}
-
-          {carsData?.data?.length === 0 ? (
+          {!carsData?.success && carsData?.data?.length === 0 ? (
             <div className="text-center py-10 text-gray-500">
               No cars found.
             </div>
-          ) : //@ts-ignore
-
-          carsLoading && carsData && carsData.data.length === 0 ? (
+          ) : carsLoading ? (
             <div>
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
             </div>
-          ) : //@ts-ignore
-
-          carsData && carsData?.data?.length > 0 ? (
+          ) : carsData && carsData?.data?.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -207,18 +215,12 @@ const CarsList = () => {
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-                {/* @ts-ignore */}
 
                 {carsData?.data && carsData?.data?.length > 0 ? (
                   <TableBody>
-                    {/* @ts-ignore */}
-
                     {carsData.data &&
-                      //@ts-ignore
-
                       carsData.data?.map((car) => (
                         <TableRow key={car.id}>
-                          {/* Car Image */}
                           <TableCell className="w-10 h-10 rounded-md overflow-hidden">
                             {car.images && car.images.length > 0 ? (
                               <Image
@@ -359,9 +361,8 @@ const CarsList = () => {
             <DialogTitle>Confirm Deletion</DialogTitle>
 
             <DialogDescription>
-              {/* @ts-ignore */}
-              Are you sure you want to delete {carToDelete?.make}{" "}
-              {/* @ts-ignore */}
+              {/*  */}
+              Are you sure you want to delete {carToDelete?.make} {/*  */}
               {carToDelete?.model} ({carToDelete?.year})? This action cannot be
               undone.
             </DialogDescription>
@@ -377,7 +378,7 @@ const CarsList = () => {
             <Button
               variant={"destructive"}
               disabled={deletingcar}
-              onClick={() => handleDeleteCar(carToDelete)}
+              onClick={handleDeleteCar}
             >
               {deletingcar ? (
                 <>

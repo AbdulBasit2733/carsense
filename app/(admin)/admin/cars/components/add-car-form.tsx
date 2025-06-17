@@ -30,8 +30,17 @@ import { Button } from "@/components/ui/button";
 import useFetch from "@/hooks/use-fetch";
 import { addCar, processCarImageWithAI } from "@/actions/cars";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { CarProps } from "@/types/types";
 // Predefined options
-const fuelTypes = ["Petrol", "Diesel", "Electric", "Hybrid", "Plug-in Hybrid", "Gasoline"];
+const fuelTypes = [
+  "Petrol",
+  "Diesel",
+  "Electric",
+  "Hybrid",
+  "Plug-in Hybrid",
+  "Gasoline",
+];
 const transmissions = ["Automatic", "Manual", "Semi-Automatic"];
 const bodyTypes = [
   "SUV",
@@ -45,35 +54,34 @@ const bodyTypes = [
 const carStatuses = ["AVAILABLE", "UNAVAILABLE", "SOLD"];
 
 const AddCarForm = () => {
-  const [activeTab, setActiveTab] = useState("ai");
-  const [uploadedImages, setUploadedImages] = useState([]);
+const [activeTab, setActiveTab] = useState("ai");
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [imageError, setImageError] = useState("");
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadedAIImage, setUploadedAIImage] = useState(null);
-
   const router = useRouter();
-  
-  const carFormSchema = z.object({
-    make: z.string().min(1, "Make is required"),
-    model: z.string().min(1, "Model is required"),
-    year: z.string().refine((Val) => {
-      const year = parseInt(Val);
-      return (
-        !isNaN(year) && year >= 1900 && year <= new Date().getFullYear() + 1
-      );
-    }, "Valid year is required"),
-    color: z.string().min(1, "Color is required"),
-    price: z.string().min(1, "Price is required"),
-    mileage: z.string().min(1, "Mileage is required"),
-    bodyType: z.string().min(1, "Body type is required"),
-    fuelType: z.string().min(1, " Fuel type is required"),
-    transmission: z.string().min(1, "Transmission type is required"),
-    seats: z.string().optional(),
-    description: z.string().min(10, "Description is at least 10 characters"),
-    status: z.enum(["AVAILABLE", "UNAVAILABLE", "SOLD"]).default("AVAILABLE"),
-    featured: z.boolean().default(false),
-  });
 
+
+  const carFormSchema = z.object({
+  make: z.string().min(1, "Make is required"),
+  model: z.string().min(1, "Model is required"),
+  year: z
+    .string()
+    .refine((val) => {
+      const year = parseInt(val);
+      return !isNaN(year) && year >= 1900 && year <= new Date().getFullYear() + 1;
+    }, "Valid year is required"),
+  color: z.string().min(1, "Color is required"),
+  price: z.string().min(1, "Price is required"),
+  mileage: z.string().min(1, "Mileage is required"),
+  bodyType: z.string().min(1, "Body type is required"),
+  fuelType: z.string().min(1, "Fuel type is required"),
+  transmission: z.string().min(1, "Transmission is required"),
+  seats: z.string().optional(),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  status: z.enum(["AVAILABLE", "UNAVAILABLE", "SOLD"]).default("AVAILABLE"),
+  featured: z.boolean().default(false),
+});
   const {
     register,
     setValue,
@@ -99,68 +107,124 @@ const AddCarForm = () => {
       featured: false,
     },
   });
+
   const {
+    mutate: addCarFn,
+    isPending: addCarLoading,
     data: addCarResult,
-    loading: addCarLoading,
-    fn: addCarFn,
-  } = useFetch(addCar);
+    error: addCarError,
+  } = useMutation({
+    mutationFn: addCar,
+  });
+
+  const {
+    mutate: processImageFn,
+    isPending: processImageLoading,
+    data: processImageResult,
+    error: processImageError,
+  } = useMutation({
+    mutationFn: processCarImageWithAI,
+  });
 
   useEffect(() => {
-                //@ts-ignore
-
     if (addCarResult?.success && !addCarLoading) {
       toast.success("Car added successfully");
       router.push("/admin/cars");
     }
   }, [addCarResult, addCarLoading]);
-                //@ts-ignore
 
-  const onSubmit = async (data) => {
+  useEffect(() => {
+    if (processImageError) {
+      toast.error(processImageError?.message || "Failed to process image");
+    }
+  }, [processImageError]);
+
+  useEffect(() => {
+    if (processImageResult && uploadedAIImage) {
+      const carDetails = processImageResult.data;
+
+      setValue("make", carDetails.make);
+      setValue("model", carDetails.model);
+      setValue("year", carDetails.year.toString());
+      setValue("color", carDetails.color);
+      setValue("bodyType", carDetails.bodyType);
+      setValue("fuelType", carDetails.fuelType);
+      setValue("price", carDetails.price);
+      setValue("seats", carDetails.seats?.toString() || "");
+      setValue("mileage", carDetails.mileage);
+      setValue("transmission", carDetails.transmission);
+      setValue("description", carDetails.description);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target && typeof e.target.result === "string") {
+          setUploadedImages((prev) => [...prev, e.target!.result as string]);
+        }
+      };
+      reader.readAsDataURL(uploadedAIImage);
+
+      toast.success("Successfully extracted details from the image", {
+        description: `Detected ${carDetails.year} ${carDetails.make} ${carDetails.model} With ${Math.round(
+          carDetails.confidence * 100
+        )}% confidence`,
+      });
+
+      setImagePreview(null);
+      setUploadedAIImage(null);
+      setActiveTab("manual");
+    }
+  }, [processImageResult, uploadedAIImage]);
+
+  const onSubmit = (data: {
+    make: string;
+    model: string;
+    year: string;
+    bodyType: string;
+    fuelType: string;
+    transmission: string;
+    color: string;
+    price: string;
+    mileage: string;
+    description: string;
+    status: "AVAILABLE" | "UNAVAILABLE" | "SOLD";
+    featured: boolean;
+    seats?: string;
+  }) => {
     if (uploadedImages.length === 0) {
       setImageError("At least one image is required");
       return;
     }
-    // console.log(data, uploadedImages);
     const carData = {
       ...data,
-      year: parseInt(data.year),
-      price: parseFloat(data.price),
-      mileage: parseInt(data.mileage),
-      seats: data.seats ? parseInt(data.seats) : null,
+      year: parseInt(String(data.year)),
+      price: parseFloat(String(data.price)),
+      mileage: parseInt(String(data.mileage)),
+      seats: data.seats ? parseInt(String(data.seats)) : null,
     };
-    await addCarFn({ carData, images: uploadedImages });
+    addCarFn({ carData, images: uploadedImages });
   };
 
-  const removeImage = (index: number) => {
+  const removeImage = (index:number) => {
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
-                //@ts-ignore
 
-  const onMultiImagesDrop = (acceptedFiles) => {
-                //@ts-ignore
-
-    const validFiles = acceptedFiles.filter((file) => {
+  const onMultiImagesDrop = (acceptedFiles:any) => {
+    const validFiles = acceptedFiles.filter((file:any) => {
       if (file.size > 5 * 1024 * 1024) {
         toast.error(`${file.name} File size exceeds 5MB limit`);
         return false;
       }
       return true;
     });
-    if (validFiles.length === 0) {
-      return;
-    }
-    const newImages = [] as string[];
-                //@ts-ignore
 
-    validFiles.forEach((file) => {
+    const newImages: string[] = [];
+    validFiles.forEach((file:any) => {
       const reader = new FileReader();
       reader.onloadend = (e) => {
         if (typeof e?.target?.result === "string") {
           newImages.push(e.target.result);
         }
         if (newImages.length === validFiles.length) {
-                //@ts-ignore
-
           setUploadedImages((prev) => [...prev, ...newImages]);
           setImageError("");
           toast.success(`${validFiles.length} Images uploaded successfully`);
@@ -170,121 +234,44 @@ const AddCarForm = () => {
     });
   };
 
-  const {
-    getRootProps: getMultiImageRootProps,
-    getInputProps: getMultiImageInputProps,
-    isDragActive,
-    isDragReject,
-  } = useDropzone({
-    onDrop: onMultiImagesDrop,
-    accept: {
-      "image/*": [".jpeg", ".jpg", ".png", ".webp"],
-    },
-    multiple: true,
-  });
-                //@ts-ignore
+  const { getRootProps: getMultiImageRootProps, getInputProps: getMultiImageInputProps } =
+    useDropzone({
+      onDrop: onMultiImagesDrop,
+      accept: { "image/*": [".jpeg", ".jpg", ".png", ".webp"] },
+      multiple: true,
+    });
 
-  const onAiDrop = useCallback((acceptedFiles) => {
+  const onAiDrop = useCallback((acceptedFiles:any) => {
     const file = acceptedFiles[0];
     if (!file) return;
-
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Image size should be less than 5MB");
       return;
     }
-
     setUploadedAIImage(file);
-
     const reader = new FileReader();
     reader.onload = (e) => {
-                //@ts-ignore
-
-      setImagePreview(e?.target?.result);
+      if (typeof e?.target?.result === "string") {
+        setImagePreview(e.target.result);
+      }
     };
     reader.readAsDataURL(file);
   }, []);
 
-  const { getRootProps: getAiRootProps, getInputProps: getAiInputProps } =
-  useDropzone({
+  const { getRootProps: getAiRootProps, getInputProps: getAiInputProps } = useDropzone({
     onDrop: onAiDrop,
-    accept: {
-      "image/*": [".jpeg", ".jpg", ".png", ".webp"],
-    },
+    accept: { "image/*": [".jpeg", ".jpg", ".png", ".webp"] },
     multiple: false,
     maxFiles: 1,
   });
 
-const {
-  loading: processImageLoading,
-  fn: processImageFn,
-  data: processImageResult,
-  error: processImageError,
-} = useFetch(processCarImageWithAI);
-
-const processWithAi = async () => {
-  if (!uploadedAIImage) {
-    toast.error("Please upload an image");
-    return;
-  }
-
-  try {
-    await processImageFn(uploadedAIImage);
-  } catch (error) {
-    console.error("Error processing image:", error);
-  }
-};
-
-useEffect(() => {
-  if (processImageError) {
-                //@ts-ignore
-
-    toast.error(processImageError?.message || "Failed to process image");
-  }
-}, [processImageError]);
-
-useEffect(() => {
-  if (processImageResult && uploadedAIImage) {
-                //@ts-ignore
-
-    const carDetails = processImageResult?.data;
-    // console.log("Extracted Car Details:", carDetails);
-    
-    setValue("make", carDetails.make);
-    setValue("model", carDetails.model);
-    setValue("year", carDetails.year.toString());
-    setValue("color", carDetails.color);
-    setValue("bodyType", carDetails.bodyType);
-    setValue("fuelType", carDetails.fuelType);
-    setValue("price", carDetails.price);
-    setValue("seats", carDetails.seats?.toString() || "");
-    setValue("mileage", carDetails.mileage);
-    setValue("transmission", carDetails.transmission);
-    setValue("description", carDetails.description);
-
-    // Handle image preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (typeof e.target?.result === "string") {
-                //@ts-ignore
-
-        setUploadedImages((prev) => [...prev, e.target.result]);
-      }
-    };
-    reader.readAsDataURL(uploadedAIImage);
-
-    toast.success("Successfully extracted details from the image", {
-      description: `Detected ${carDetails.year} ${carDetails.make} ${carDetails.model} With ${Math.round(
-        carDetails.confidence * 100
-      )}% confidence`,
-    });
-
-    setImagePreview(null);
-    setUploadedAIImage(null);
-    setActiveTab("manual"); // Move to manual tab after setting everything
-  }
-}, [processImageResult, uploadedAIImage, setValue]);
-  
-
+  const processWithAi = () => {
+    if (!uploadedAIImage) {
+      toast.error("Please upload an image");
+      return;
+    }
+    processImageFn(uploadedAIImage);
+  };
   return (
     <>
       <div>
@@ -483,9 +470,7 @@ useEffect(() => {
                     <div className="space-y-2">
                       <Label htmlFor="status">Status</Label>
                       <Select
-                //@ts-ignore
-
-                        onValueChange={(value) => setValue("status", value)}
+                        onValueChange={(value:any) => setValue("status", value)}
                         defaultValue={getValues("status")}
                       >
                         <SelectTrigger className="w-[180px]">
@@ -527,9 +512,7 @@ useEffect(() => {
                     <Checkbox
                       id="featured"
                       checked={watch("featured")}
-                      onCheckedChange={(checked) => {
-                //@ts-ignore
-
+                      onCheckedChange={(checked:any) => {
                         setValue("featured", checked);
                       }}
                     />

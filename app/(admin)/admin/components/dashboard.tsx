@@ -14,9 +14,11 @@ import {
   XCircle,
   DollarSign,
 } from "lucide-react";
-                //@ts-ignore
+import { DashboardDataProps } from "../page";
 
-const Dashboard = ({ initialData }) => {
+
+
+const Dashboard = ({ initialData }: { initialData: DashboardDataProps }) => {
   const [activeTab, setActiveTab] = useState("overview");
 
   // Show error if data fetch failed
@@ -26,7 +28,7 @@ const Dashboard = ({ initialData }) => {
         <Info className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
-          {initialData?.error || "Failed to load dashboard data"}
+          {!initialData?.success || "Failed to load dashboard data"}
         </AlertDescription>
       </Alert>
     );
@@ -439,6 +441,6 @@ const Dashboard = ({ initialData }) => {
       </Tabs>
     </div>
   );
-}
+};
 
-export default Dashboard
+export default Dashboard;

@@ -21,7 +21,7 @@ import {
   User,
   UserX,
 } from "lucide-react";
-import useFetch from "@/hooks/use-fetch";
+// import useFetch from "@/hooks/use-fetch";
 import {
   getDealershipInfo,
   getUsers,
