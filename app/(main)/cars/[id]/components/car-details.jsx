@@ -28,7 +28,6 @@ import { toast } from "sonner";
 import EMICalculator from "./emi-calculator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { format } from "date-fns";
-import { CarProps } from "@/types/types";
 import { useMutation } from "@tanstack/react-query";
 
 

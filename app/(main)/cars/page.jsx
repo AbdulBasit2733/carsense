@@ -7,7 +7,6 @@ export const metadata = {
   description: "Browse and search for your dream car",
 };
 
-
 const CarsPage = async () => {
   const filtersData = await getCarFilters();
 
@@ -15,7 +14,9 @@ const CarsPage = async () => {
     return (
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-6xl mb-4 gradient-title">Browse cars</h1>
-        <div className="text-red-500">Failed to load car filters. Please try again later.</div>
+        <div className="text-red-500">
+          Failed to load car filters. Please try again later.
+        </div>
       </div>
     );
   }
