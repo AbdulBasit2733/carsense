@@ -27,12 +27,11 @@ import { toast } from "sonner";
 import { Camera, Loader, Loader2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import useFetch from "@/hooks/use-fetch";
 import { addCar, processCarImageWithAI } from "@/actions/cars";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { CarProps } from "@/types/types";
-// Predefined options
+
+
 const fuelTypes = [
   "Petrol",
   "Diesel",

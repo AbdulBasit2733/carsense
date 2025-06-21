@@ -28,7 +28,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CarProps } from "@/types/types";
 import { useMutation } from "@tanstack/react-query";
 import {
   CarIcon,
