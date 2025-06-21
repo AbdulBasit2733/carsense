@@ -24,9 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import useFetch from "@/hooks/use-fetch";
 import { cn } from "@/lib/utils";
-import { CarProps, TestDriveInfoProps } from "@/types/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";

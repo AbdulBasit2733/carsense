@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CarProps } from "@/types/types";
 import { useMutation } from "@tanstack/react-query";
 import { CalendarRange, Loader2, Search } from "lucide-react";
 import React, { useEffect, useState } from "react";

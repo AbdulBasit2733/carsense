@@ -4,13 +4,10 @@ import { redirect } from "next/navigation";
 import React from "react";
 import ReservationsList from "./components/reservations-list";
 
-
 export const metadata = {
   title: "My Reservations | Carsense",
   description: "Manage your test drive reservations",
 };
-
-
 
 const Reservations = async () => {
   const { userId } = await auth();
