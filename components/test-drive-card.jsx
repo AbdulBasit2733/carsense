@@ -15,8 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { BookingStatusProps } from "@/types/types";
-import { ReservationDataProps } from "@/app/(main)/reservations/page";
 
 const formatTime = (timeString) => {
   try {
