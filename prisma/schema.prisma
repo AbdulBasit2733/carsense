@@ -24,7 +24,7 @@ model User {
   phone       String?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
-  role        USER_ROLE          @default(ADMIN)
+  role        USER_ROLE          @default(USER)
   savedCars   UserSavedCars[]
   testDrives  TestDriveBooking[]
 }

@@ -1,4 +1,3 @@
-
 import { getFeaturedCars } from "@/actions/home";
 import HomeSearch from "@/components/home-search";
 import OurTeamsSection from "@/components/our-teams";
@@ -67,6 +66,7 @@ const Home = async () => {
                   title={`${item.make} ${item.model}`}
                   price={item.price}
                   year={item.year}
+                  featured={item.featured}
                   transmission={item.transmission || "Automatic"}
                   fuelType={item.fuelType || "Petrol"}
                   icon={item.images?.[0]}

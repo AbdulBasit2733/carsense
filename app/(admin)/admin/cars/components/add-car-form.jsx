@@ -589,9 +589,6 @@ const [activeTab, setActiveTab] = useState("ai");
                   </Button>
                 </form>
               </CardContent>
-              <CardFooter>
-                <p>Card Footer</p>
-              </CardFooter>
             </Card>
           </TabsContent>
           <TabsContent value="ai" className="mt-6">

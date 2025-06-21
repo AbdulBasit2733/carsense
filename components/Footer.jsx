@@ -45,6 +45,24 @@ const Footer = ({ isAdminPage = false }) => {
                     Cars
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    href="/reservations"
+                    className="flex items-center text-slate-700 hover:text-red-500 transition"
+                  >
+                    <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                    Reservations
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/saved-cars"
+                    className="flex items-center text-slate-700 hover:text-red-500 transition"
+                  >
+                    <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                    Saved Cars
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

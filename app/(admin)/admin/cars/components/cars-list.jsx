@@ -2,7 +2,13 @@
 import { deleteCar, getCars, updateCarStatus } from "@/actions/cars";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +36,7 @@ import {
 } from "@/components/ui/table";
 import { useMutation } from "@tanstack/react-query";
 import {
+  Car,
   CarIcon,
   Eye,
   Loader2,
@@ -44,7 +51,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-
 
 const CarsList = () => {
   const [search, setSearch] = useState("");
@@ -72,7 +78,8 @@ const CarsList = () => {
     },
   });
 
-  // console.log("Admin cars data", carsData);
+
+  console.log("Admin cars data", carsData);
 
   // Delete Car
   const {
@@ -91,8 +98,7 @@ const CarsList = () => {
     isPending: updatingCar,
     error: updateError,
   } = useMutation({
-    mutationFn: ({ id, payload }) =>
-      updateCarStatus(id, payload),
+    mutationFn: ({ id, payload }) => updateCarStatus(id, payload),
   });
 
   // handle mutation success
@@ -185,13 +191,22 @@ const CarsList = () => {
         </form>
       </div>
       <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Car className="h-5 w-5" />
+            Cars
+          </CardTitle>
+          <CardDescription>
+            Manage all cars and update their status
+          </CardDescription>
+        </CardHeader>
         <CardContent className="p-0">
-          {!carsData?.success && carsData?.data?.length === 0 ? (
+          {carsData?.data?.length === 0 ? (
             <div className="text-center py-10 text-gray-500">
               No cars found.
             </div>
           ) : carsLoading ? (
-            <div>
+            <div className="flex justify-center items-center">
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
             </div>
           ) : carsData && carsData?.data?.length > 0 ? (
@@ -252,7 +267,11 @@ const CarsList = () => {
                               variant={"ghost"}
                               size={"sm"}
                               className="p-0 h-9 w-9"
-                              onClick={() => handleToggleFeatured(car)}
+                              onClick={() => {
+                                console.log(car);
+                                handleToggleFeatured(car)
+                                
+                              }}
                             >
                               {car.featured ? (
                                 <Star className="text-amber-500 fill-amber-500 h-5 w-5" />

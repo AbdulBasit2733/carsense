@@ -123,10 +123,9 @@ export async function processCarImageWithAI(file) {
   }
 }
 
-export async function addCar({
-  carData,
-  images,
-}) {
+export async function addCar({ carData, images }) {
+  console.log(carData);
+
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -264,7 +263,6 @@ export async function getCars({ search }) {
         : undefined,
       orderBy: { createdAt: "desc" },
     });
-
     return {
       success: true,
       data: cars.map((car) => serializedCarData(car)) || [],
@@ -356,10 +354,7 @@ export const deleteCar = async (carId) => {
   }
 };
 
-export const updateCarStatus = async (
-  carId,
-  { status, featured }
-) => {
+export const updateCarStatus = async (carId, { status, featured }) => {
   try {
     const { userId } = await auth();
     if (!userId) {

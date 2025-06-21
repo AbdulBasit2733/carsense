@@ -1,4 +1,5 @@
 "use client";
+
 import { getAdminTestDrives, updateTestDriveStatus } from "@/actions/admin";
 import { cancelTestDrive } from "@/actions/test-drive";
 import TestDriveCard from "@/components/test-drive-card";
@@ -24,33 +25,30 @@ import { CalendarRange, Loader2, Search } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-
 const TestDriveList = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  // 1. Fetch test drives
   const {
     mutate: fetchTestDrives,
     data: testDrivesData,
     isPending: fetchingTestDrives,
     error: testDrivesError,
-  } = useMutation(
-    {
-      mutationFn: async ({ search, status }) => {
+  } = useMutation({
+    mutationFn: async ({ search, status }) => {
+      try {
         const result = await getAdminTestDrives({ search, status });
-        if (!("data" in result) || !Array.isArray(result.data)) {
-          return {
-            success: result.success,
-            message: result.message,
-            data: [],
-          };
+        if (!result?.success || !Array.isArray(result.data)) {
+          throw new Error(result?.message || "Invalid response format");
         }
         return result;
-      },
-    }
-  );
-
-  // console.log("Drive Data", testDrivesData);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        throw err;
+      }
+    },
+  });
 
   // 2. Update Status
   const {
@@ -59,8 +57,14 @@ const TestDriveList = () => {
     data: updateResult,
     error: updateError,
   } = useMutation({
-    mutationFn: (args) =>
-      updateTestDriveStatus(args.id, args.status),
+    mutationFn: async (args) => {
+      try {
+        return await updateTestDriveStatus(args.id, args.status);
+      } catch (err) {
+        console.error("Update error:", err);
+        throw err;
+      }
+    },
   });
 
   // 3. Cancel Booking
@@ -70,32 +74,39 @@ const TestDriveList = () => {
     data: cancelResult,
     error: cancelError,
   } = useMutation({
-    mutationFn: (bookingId) => cancelTestDrive(bookingId),
+    mutationFn: async (bookingId) => {
+      try {
+        return await cancelTestDrive(bookingId);
+      } catch (err) {
+        console.error("Cancel error:", err);
+        throw err;
+      }
+    },
   });
 
-  // Trigger fetch on mount and whenever filters change
+  // Initial fetch and on filter change
   useEffect(() => {
     fetchTestDrives({ search, status: statusFilter });
   }, [search, statusFilter]);
 
-  // React to update/cancel results
+  // Handle results
   useEffect(() => {
     if (updateResult?.success) {
-      toast.success("Test drive status updated successfully");
+      toast.success("Test drive status updated");
       fetchTestDrives({ search, status: statusFilter });
+    } else if (updateError) {
+      toast.error("Failed to update test drive status");
     }
-    if (updateError) {
-      toast.error("failed to update test drive");
-    }
+
     if (cancelResult?.success) {
-      toast.success("Test drive cancelled successfully");
+      toast.success("Test drive cancelled");
       fetchTestDrives({ search, status: statusFilter });
-    }
-    if (cancelError) {
+    } else if (cancelError) {
       toast.error("Failed to cancel test drive");
     }
-    if(testDrivesError){
-      toast.error("Failed to fetch test drives")
+
+    if (testDrivesError) {
+      toast.error("Failed to fetch test drives");
     }
   }, [updateResult, cancelResult, cancelError, testDrivesError, updateError]);
 
@@ -105,23 +116,32 @@ const TestDriveList = () => {
   };
 
   const handleUpdateStatus = (id, newStatus) => {
-    if (newStatus) updateStatus({ id, status: newStatus });
+    if (newStatus) {
+      updateStatus({ id, status: newStatus });
+    }
   };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center justify-between">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select
+          value={statusFilter}
+          onValueChange={(value) =>
+            setStatusFilter(value === "ALL" ? "" : value)
+          }
+        >
           <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="All Statuses" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={"All Statuses"}>All Statuses</SelectItem>
+            <SelectItem value="ALL">All Statuses</SelectItem>
             <SelectItem value="PENDING">Pending</SelectItem>
             <SelectItem value="COMPLETED">Completed</SelectItem>
-            <SelectItem value="CANCELED">Cancelled</SelectItem>
-            <SelectItem value="NO_SHOW">NO Show</SelectItem>
+            <SelectItem value="CANCELLED">Cancelled</SelectItem>
+            <SelectItem value="NO_SHOW">No Show</SelectItem>
           </SelectContent>
         </Select>
+
         <form className="flex w-full" onSubmit={handleSearchSubmit}>
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
@@ -138,6 +158,7 @@ const TestDriveList = () => {
           </Button>
         </form>
       </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -145,22 +166,32 @@ const TestDriveList = () => {
             Test Drive Bookings
           </CardTitle>
           <CardDescription>
-            Manage All test drive reservations and update their status
+            Manage all test drive reservations and update their status
           </CardDescription>
-          <CardAction>Card Action</CardAction>
+          <CardAction />
         </CardHeader>
         <CardContent>
           {fetchingTestDrives && !testDrivesData ? (
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            <div className="flex justify-center items-center">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            </div>
           ) : (
             <div className="space-y-4">
-              {testDrivesData &&
-                testDrivesData?.data?.map((booking) => (
+              {!testDrivesData?.data?.length ? (
+                <div className="text-center py-10 text-gray-500">
+                  No bookings found.
+                </div>
+              ) : (
+                testDrivesData.data.map((booking) => (
                   <div key={booking.id} className="relative">
                     <TestDriveCard
                       booking={booking}
                       onCancel={async (bookingId) => {
-                        await cancelBookingFn(bookingId);
+                        try {
+                          cancelBookingFn(bookingId);
+                        } catch (err) {
+                          toast.error("Unexpected cancel error");
+                        }
                       }}
                       showActions={["PENDING", "CONFIRMED"].includes(
                         booking.status
@@ -189,7 +220,8 @@ const TestDriveList = () => {
                       )}
                     />
                   </div>
-                ))}
+                ))
+              )}
             </div>
           )}
         </CardContent>

@@ -1,10 +1,10 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
 import ReactQueryProvider from "./provider";
+import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,6 +14,7 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const isAdminPage = false;
   return (
     <ClerkProvider>
       <html lang="en">
@@ -21,8 +22,8 @@ export default function RootLayout({ children }) {
           <ReactQueryProvider>
             <Header isAdminPage={false} />
             <main>{children}</main>
+            {isAdminPage === false && <Footer />}
             <Toaster richColors />
-            <Footer />
           </ReactQueryProvider>
         </body>
       </html>
