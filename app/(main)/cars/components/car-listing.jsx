@@ -10,10 +10,20 @@ import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import CarCard from "@/components/CarCard";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const CarListing = () => {
   const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
+
   const limit = 6;
 
   const search = searchParams.get("search") || "";
@@ -44,7 +54,7 @@ const CarListing = () => {
         minPrice,
         maxPrice,
         sortBy,
-        page,
+        page: currentPage,
         limit,
       });
       // Normalize the response to always have data and pagination
@@ -70,7 +80,7 @@ const CarListing = () => {
     minPrice,
     maxPrice,
     sortBy,
-    page,
+    currentPage,
   ]);
 
   if (isPending && !result) {
@@ -130,6 +140,58 @@ const CarListing = () => {
         {cars.map((car) => (
           <CarCard key={car.id} car={car} />
         ))}
+      </div>
+      <div className="mt-5">
+        <Pagination>
+          <PaginationContent>
+            {/* Previous Button */}
+            <PaginationItem>
+              <PaginationPrevious
+                className={`cursor-pointer ${
+                  currentPage === 1 ? "opacity-50 pointer-events-none" : ""
+                }`}
+                onClick={() => {
+                  if (currentPage > 1) setCurrentPage(currentPage - 1);
+                }}
+              />
+            </PaginationItem>
+
+            {/* Page Numbers */}
+            {Array.from({ length: pagination.pages }).map((_, index) => {
+              const pageNum = index + 1;
+              const isActive = pageNum === currentPage;
+              return (
+                <PaginationItem key={pageNum}>
+                  <PaginationLink
+                    isActive={isActive}
+                    className={`cursor-pointer ${
+                      isActive ? "" : "hover:opacity-80"
+                    }`}
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+
+            {/* Next Button */}
+            <PaginationItem>
+              <PaginationNext
+                className={`cursor-pointer ${
+                  currentPage === pagination.pages
+                    ? "opacity-50 pointer-events-none"
+                    : ""
+                }`}
+                onClick={() => {
+                  if (currentPage < pagination.pages) {
+                    setCurrentPage(currentPage + 1);
+                  }
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

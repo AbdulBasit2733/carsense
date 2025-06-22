@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
           <ReactQueryProvider>
             <Header isAdminPage={false} />
             <main>{children}</main>
-            {isAdminPage === false && <Footer />}
+            {isAdminPage === false ? <Footer /> : null}
             <Toaster richColors />
           </ReactQueryProvider>
         </body>

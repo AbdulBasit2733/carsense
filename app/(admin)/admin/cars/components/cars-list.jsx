@@ -79,7 +79,7 @@ const CarsList = () => {
   });
 
 
-  console.log("Admin cars data", carsData);
+  // console.log("Admin cars data", carsData);
 
   // Delete Car
   const {

@@ -45,10 +45,7 @@ const testDriveSchema = z.object({
   notes: z.string().optional(),
 });
 
-const TestDriveForm = ({
-  car,
-  testDriveInfo,
-}) => {
+const TestDriveForm = ({ car, testDriveInfo }) => {
   // console.log("car", car);
   // console.log("test", testDriveInfo);
 
@@ -103,21 +100,26 @@ const TestDriveForm = ({
     if (!selectedDate || !dealership?.workingHours) return;
     const selectedDayOfWeek = format(selectedDate, "EEEE").toUpperCase();
     const daySchedule = dealership.workingHours.find(
-      (day ) => day.dayOfWeek === selectedDayOfWeek
+      (day) => day.dayOfWeek === selectedDayOfWeek
     );
     if (!daySchedule || !daySchedule.isOpen) {
       setAvailableTimeSlot([]);
       return;
     }
-    const openHour = parseInt(daySchedule.openTime.split(":")[0]);
-    const closeHour = parseInt(daySchedule.closeTime.split(":")[0]);
+    const openHour = daySchedule?.openTime
+      ? parseInt(String(daySchedule.openTime).split(":")[0])
+      : 0;
+
+    const closeHour = daySchedule?.closeTime
+      ? parseInt(String(daySchedule.closeTime).split(":")[0])
+      : 0;
 
     const slots = [];
     for (let hour = openHour; hour < closeHour; hour++) {
       const startTime = `${hour.toString().padStart(2, "0")}:00`;
       const endTime = `${(hour + 1).toString().padStart(2, "0")}:00`;
 
-      const isBooked = existingBookings.some((booking ) => {
+      const isBooked = existingBookings.some((booking) => {
         const bookingDate = booking.date;
         return (
           bookingDate === format(selectedDate, "yyyy-MM-dd") &&
@@ -169,7 +171,7 @@ const TestDriveForm = ({
     }
   }, [bookingError]);
 
-  const onSubmit = async (data ) => {
+  const onSubmit = async (data) => {
     const selectedSlot = availableTimeSlot.find(
       (slot) => slot.id === data.timeSlot
     );
@@ -178,8 +180,7 @@ const TestDriveForm = ({
     }
     await bookTestDriveFn({
       carId: car.id,
-      bookingDate: format(parseISO(data.date), "yyyy-MM-dd"),
-
+      bookingDate: format(data.date, "yyyy-MM-dd"),
       startTime: selectedSlot?.startTime ?? "",
       endTime: selectedSlot?.endTime ?? "",
       notes: data.notes || "",

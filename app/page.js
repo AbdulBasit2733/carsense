@@ -45,16 +45,27 @@ const Home = async () => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold">Featured Cars</h2>
-            <Button variant="ghost" className="flex items-center" asChild>
-              <Link href="/cars">
-                View All <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
+
+            <Link
+              href="/cars"
+              className="group inline-flex w-fit items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+            >
+              <span className="mr-2">View All</span>
+              <ChevronRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+            {/**
+             * 
+             <Button variant="ghost" className="flex items-center" asChild>
+             <Link href="/cars">
+             View All <ChevronRight className="ml-1 h-4 w-4" />
+             </Link>
+             </Button>}
+             */}
           </div>
 
           <BentoGrid className="max-w-7xl mx-auto">
             {featuredCars && featuredCars.length === 0 ? (
-              <div>
+              <div className=" bg-gray-300 flex justify-center items-center py-20">
                 <h1>No Cars Found</h1>
               </div>
             ) : (
@@ -83,38 +94,89 @@ const Home = async () => {
         </div>
       </section>
 
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold">Browse By Make</h2>
-            <Button variant="ghost" className="flex items-center" asChild>
-              <Link href="/cars">
-                View All <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
+      <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
+        <div className="container mx-auto px-4 max-w-7xl">
+          {/* Header Section */}
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-12 text-center md:text-left">
+            <div className="mb-6 md:mb-0">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
+                Browse By Make
+              </h2>
+              <p className="text-lg text-gray-600 max-w-md">
+                Discover your perfect vehicle from our extensive collection of
+                premium car brands
+              </p>
+            </div>
+
+            <Link
+              href="/cars"
+              className="group inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+            >
+              <span className="mr-2">View All Cars</span>
+              <ChevronRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {carMakes.map((make) => (
-              <Link
+
+          {/* Car Makes Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {carMakes.map((make, index) => (
+              <div
                 key={make.name}
-                href={`/cars?make=${make.name}`}
-                className="bg-white rounded-lg shadow p-4 text-center hover:shadow-md transition cursor-pointer"
+                className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden border border-gray-100"
+                style={{
+                  animationDelay: `${index * 0.1}s`,
+                }}
               >
-                <div className="h-16 w-auto mx-auto mb-2 relative">
-                  <Image
-                    src={make.image}
-                    alt={make.name}
-                    fill
-                    style={{ objectFit: "contain" }}
-                  />
+                {/* Background gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                {/* Card content */}
+                <div className="relative p-6 text-center">
+                  {/* Logo container */}
+                  <div className="h-16 w-16 mx-auto mb-4 relative bg-gray-50 rounded-full flex items-center justify-center group-hover:bg-red-50 transition-colors duration-300">
+                    <img
+                      src={make.image}
+                      alt={make.name}
+                      className="h-24 w-24 object-contain filter group-hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
+
+                  {/* Brand name */}
+                  <h3 className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors duration-300 text-sm md:text-base">
+                    {make.name}
+                  </h3>
+
+                  {/* Hover indicator */}
+                  <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-red-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                 </div>
-                <h3 className="font-medium">{make.name}</h3>
-              </Link>
+
+                {/* Corner accent */}
+                <div className="absolute top-0 right-0 w-8 h-8 bg-red-500 rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
             ))}
+          </div>
+
+          {/* Bottom CTA */}
+          <div className="mt-16 text-center">
+            <div className="inline-flex items-center space-x-2 text-gray-600">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                <div
+                  className="w-2 h-2 bg-red-400 rounded-full animate-pulse"
+                  style={{ animationDelay: "0.2s" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-red-300 rounded-full animate-pulse"
+                  style={{ animationDelay: "0.4s" }}
+                ></div>
+              </div>
+              <span className="text-sm font-medium">
+                Trusted by thousands of car enthusiasts
+              </span>
+            </div>
           </div>
         </div>
       </section>
-
       <OurTeamsSection />
     </div>
   );

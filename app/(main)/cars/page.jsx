@@ -1,7 +1,7 @@
-import { getCarFilters } from "@/actions/car-listing";
 import React from "react";
 import CarFilters from "./components/cars-filters";
 import CarListing from "./components/car-listing";
+import { getCarFilters } from "@/actions/car-listing";
 export const metadata = {
   title: "Cars | Carsense",
   description: "Browse and search for your dream car",
@@ -9,6 +9,8 @@ export const metadata = {
 
 const CarsPage = async () => {
   const filtersData = await getCarFilters();
+  console.log(filtersData);
+  
 
   if (!filtersData.success || !filtersData.data) {
     return (
@@ -27,7 +29,7 @@ const CarsPage = async () => {
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="w-full lg:w-80 flex shrink-0">
           {/* Filters */}
-          <CarFilters filters={filtersData.success && filtersData.data} />
+          <CarFilters filters={filtersData?.data} />
         </div>
         <div>
           <CarListing />

@@ -91,10 +91,10 @@ export async function getCars({
   bodyType = "",
   fuelType = "",
   transmission = "",
-  minPrice = 0,
+  minPrice,
   maxPrice = Number.MAX_SAFE_INTEGER,
-  sortBy = "newest",
-  page = 1,
+  sortBy,
+  page,
   limit = 6,
 }) {
   try {

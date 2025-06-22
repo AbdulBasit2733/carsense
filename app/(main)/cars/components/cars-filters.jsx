@@ -22,7 +22,7 @@ import {
 import CarFilterControls from "./filter-control";
 
 const CarFilters = ({ filters }) => {
-  // console.log(filters);
+  console.log(filters);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -59,7 +59,7 @@ const CarFilters = ({ filters }) => {
     transmission,
     currentMinPrice > filters.priceRange.min ||
       currentMaxPrice < filters.priceRange.max,
-  ].filter().length;
+  ].filter(Boolean).length;
 
   const currentFilters = {
     make,

@@ -1,10 +1,19 @@
 "use client";
-import { ChevronLeft, ChevronRight, Mail, Phone } from 'lucide-react';
-import Image from 'next/image';
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Mail,
+  Phone,
+  Star,
+  Award,
+} from "lucide-react";
+import profile1 from "@/public/images/profile-1.jpg";
+import profile2 from "@/public/images/profile-2.jpg";
+import profile3 from "@/public/images/profile-3.jpg";
+import Image from "next/image";
 
-const OurTeamsSection = () => {
+const OurTeamSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const teamMembers = [
@@ -14,7 +23,9 @@ const OurTeamsSection = () => {
       position: "Customer Advisor",
       email: "emily@vehica.com",
       phone: "(123) 345-6789",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b2fd?w=300&h=300&fit=crop&crop=face"
+      image: profile1,
+      rating: 4.9,
+      specialties: ["Luxury Cars", "Customer Service"],
     },
     {
       id: 2,
@@ -22,7 +33,9 @@ const OurTeamsSection = () => {
       position: "Customer Advisor",
       email: "george@vehica.com",
       phone: "(123) 345-6789",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face"
+      image: profile3,
+      rating: 4.8,
+      specialties: ["Sports Cars", "Finance"],
     },
     {
       id: 3,
@@ -30,7 +43,9 @@ const OurTeamsSection = () => {
       position: "Customer Advisor",
       email: "isabella@vehica.com",
       phone: "(123) 345-6789",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=face"
+      image: profile2,
+      rating: 4.9,
+      specialties: ["SUVs", "Trade-ins"],
     },
     {
       id: 4,
@@ -38,16 +53,18 @@ const OurTeamsSection = () => {
       position: "Senior Advisor",
       email: "michael@vehica.com",
       phone: "(123) 345-6789",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face"
-    }
+      image: profile1,
+      rating: 5.0,
+      specialties: ["Commercial", "Fleet Sales"],
+    },
   ];
 
   const features = [
-    "Praesent nibh luctus viverra",
-    "Adipiscing elit",
-    "Tempor incididunt ut labore",
-    "Quis ipsum suspendisseviverra",
-    "Maecenas ac"
+    "Expert automotive consultation",
+    "Personalized vehicle matching",
+    "Comprehensive financing options",
+    "Award-winning customer service",
+    "Professional after-sales support",
   ];
 
   const nextSlide = () => {
@@ -55,7 +72,9 @@ const OurTeamsSection = () => {
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + teamMembers.length) % teamMembers.length);
+    setCurrentSlide(
+      (prev) => (prev - 1 + teamMembers.length) % teamMembers.length
+    );
   };
 
   const getVisibleMembers = () => {
@@ -68,89 +87,206 @@ const OurTeamsSection = () => {
   };
 
   return (
-    <div className="bg-slate-800 text-white py-16 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-4 grid-cols-1 gap-5 items-start">
-          {/* Left Content */}
-          <div className="space-y-8 col-span-1">
-            <h2 className="text-5xl font-bold">Our Team</h2>
-            <div className="space-y-4">
+    <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-20 px-6 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-red-500 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-600 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Left Content */}
+        <div className="space-y-10 col-span-2 flex flex-col justify-center items-center text-center">
+          <div className="space-y-6">
+            <div className="inline-flex items-center space-x-2 bg-red-500/20 px-4 py-2 rounded-full">
+              <Award className="w-5 h-5 text-red-400" />
+              <span className="text-red-300 font-medium">Meet Our Experts</span>
+            </div>
+
+            <h2 className="text-5xl lg:text-6xl font-bold leading-tight">
+              Our Professional
+              <span className="block text-red-400">Team</span>
+            </h2>
+
+            <p className="text-xl text-gray-300 leading-relaxed">
+              Dedicated professionals committed to finding your perfect vehicle
+              match with unparalleled expertise and service.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <h3 className="text-2xl font-semibold text-red-300 mb-4">
+              Why Choose Our Team?
+            </h3>
+            <div className=" flex justify-center items-center flex-wrap gap-x-10 gap-y-5">
               {features.map((feature, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
-                  <span className="text-gray-300">{feature}</span>
+                <div
+                  key={index}
+                  className="flex items-center space-x-4 group"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="w-3 h-3 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex-shrink-0 group-hover:scale-125 transition-transform duration-300"></div>
+                  <span className="text-gray-300 group-hover:text-white transition-colors duration-300 text-lg">
+                    {feature}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right Content - Team Cards with Animation */}
-          <div className="relative col-span-3">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.5 }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-6"
-              >
-                {getVisibleMembers().map((member) => (
-                  <div key={member.id} className="bg-white rounded-lg overflow-hidden shadow-lg w-full h-full">
-                    <div className="relative">
-                      <Image
-                        src={member.image}
-                        alt={member.name}
-                        width={400}
-                        height={400}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-4 right-4 flex space-x-2">
-                        <button className="bg-orange-500 hover:bg-orange-600 p-2 rounded-md">
-                          <Phone className="w-4 h-4 text-white" />
-                        </button>
-                        <button className="bg-orange-500 hover:bg-orange-600 p-2 rounded-md">
-                          <Mail className="w-4 h-4 text-white" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="p-6 text-gray-800">
-                      <h3 className="text-xl font-bold mb-1">{member.name}</h3>
-                      <p className="text-gray-500 mb-4">{member.position}</p>
-                      <div className="space-y-2">
-                        <a href={`mailto:${member.email}`} className="text-orange-500 hover:text-orange-600 block">
-                          {member.email}
-                        </a>
-                        <a href={`tel:${member.phone}`} className="text-gray-400 block">
-                          {member.phone}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Navigation Buttons */}
-            <div className="flex space-x-4 mt-8">
-              <button
-                onClick={prevSlide}
-                className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-full shadow-lg"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-full shadow-lg"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-6 pt-8 border-t border-gray-700">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-red-400 mb-2">500+</div>
+              <div className="text-gray-400">Happy Customers</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-red-400 mb-2">15+</div>
+              <div className="text-gray-400">Years Experience</div>
             </div>
           </div>
         </div>
+        <div className="relative col-span-3 flex flex-col justify-center items-center mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
+            {getVisibleMembers().map((member, index) => (
+              <div
+                key={member.id}
+                className="group relative bg-white rounded-2xl overflow-hidden shadow-2xl hover:shadow-red-500/25 transition-all duration-500 transform hover:-translate-y-2"
+                style={{
+                  animationDelay: `${index * 0.2}s`,
+                  animation: "fadeInUp 0.6s ease-out forwards",
+                }}
+              >
+                {/* Image Container */}
+                <div className="relative overflow-hidden">
+                  <Image
+                    src={member.image}
+                    alt={member.name}
+                    width={500}
+                    height={80}
+                    className="w-full h-60 object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                  {/* Contact buttons */}
+                  <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                    <button className="bg-red-500 hover:bg-red-600 p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110">
+                      <Phone className="w-4 h-4 text-white" />
+                    </button>
+                    <button className="bg-red-500 hover:bg-red-600 p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110">
+                      <Mail className="w-4 h-4 text-white" />
+                    </button>
+                  </div>
+
+                  {/* Rating badge */}
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center space-x-1">
+                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                    <span className="text-sm font-semibold text-gray-800">
+                      {member.rating}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Card Content */}
+                <div className="p-6 text-gray-800">
+                  <div className="mb-4">
+                    <h3 className="text-2xl font-bold mb-2 group-hover:text-red-600 transition-colors duration-300">
+                      {member.name}
+                    </h3>
+                    <p className="text-red-500 font-semibold mb-3">
+                      {member.position}
+                    </p>
+
+                    {/* Specialties */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {member.specialties.map((specialty, idx) => (
+                        <span
+                          key={idx}
+                          className="bg-red-50 text-red-600 px-2 py-1 rounded-full text-xs font-medium"
+                        >
+                          {specialty}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <a
+                      href={`mailto:${member.email}`}
+                      className="text-red-500 hover:text-red-600 font-medium transition-colors duration-300 flex items-center space-x-2 group/link"
+                    >
+                      <Mail className="w-4 h-4" />
+                      <span className="group-hover/link:underline">
+                        {member.email}
+                      </span>
+                    </a>
+                    <a
+                      href={`tel:${member.phone}`}
+                      className="text-gray-500 hover:text-gray-700 transition-colors duration-300 flex items-center space-x-2 group/link"
+                    >
+                      <Phone className="w-4 h-4" />
+                      <span className="group-hover/link:underline">
+                        {member.phone}
+                      </span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* Bottom accent */}
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-red-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Navigation */}
+          <div className="flex justify-center space-x-4 mt-12">
+            <button
+              onClick={prevSlide}
+              className="group bg-white/10 hover:bg-red-600 backdrop-blur-sm text-white p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
+            >
+              <ChevronLeft className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="group bg-white/10 hover:bg-red-600 backdrop-blur-sm text-white p-4 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
+            >
+              <ChevronRight className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+            </button>
+          </div>
+
+          {/* Slide indicators */}
+          <div className="flex justify-center space-x-2 mt-12">
+            {teamMembers.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === currentSlide
+                    ? "bg-red-500 scale-125"
+                    : "bg-white/30 hover:bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default OurTeamsSection;
+export default OurTeamSection;
