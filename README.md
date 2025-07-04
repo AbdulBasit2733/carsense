@@ -39,7 +39,7 @@ docker build -t carsense \
 2. **Run the container**:
 
 ```bash
-docker run -p 3000:3000 --env-file .env.local carsense
+docker run -p 3000:3000 --env-file .env carsense
 ```
 
 Then visit: [http://localhost:3000](http://localhost:3000)
