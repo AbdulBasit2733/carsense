@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Here's your **updated `README.md`** for the `carsense` project with Docker instructions and cleaned-up content.
 
-## Getting Started
+---
 
-First, run the development server:
+````md
+# 🚗 CarSense
+
+This is a fullstack [Next.js](https://nextjs.org) app built using the **App Router**, **Server Actions**, **Clerk** for authentication, and **Supabase PostgreSQL** as the database.
+
+Now with full **Docker support** 🐳 for production and local environments!
+
+---
+
+## 🚀 Getting Started (Local Development)
+
+Install dependencies:
+
+```bash
+npm install
+````
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🐳 Run with Docker (Production Build)
 
-## Learn More
+1. **Build the Docker image**:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+docker build -t carsense \
+  --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your-clerk-key .
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Run the container**:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+docker run -p 3000:3000 --env-file .env.local carsense
+```
 
-## Deploy on Vercel
+Then visit: [http://localhost:3000](http://localhost:3000)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🛠 Development Notes
+
+* Edit the homepage at: `app/page.js`
+* Dynamic routes like `/admin` use `export const dynamic = 'force-dynamic'` to support runtime headers
+* Prisma client is auto-generated during Docker build (`prisma generate`)
+* Clerk's public key is injected at **build time**, not runtime
+
+---
+
+## 📚 Learn More
+
+* [Next.js Documentation](https://nextjs.org/docs)
+* [Supabase Docs](https://supabase.com/docs)
+* [Clerk Docs](https://clerk.dev/docs)
+* [Prisma Docs](https://www.prisma.io/docs)
+
+---
+
+## ☁️ Deployment
+
+This app can be deployed using:
+
+* [Vercel](https://vercel.com/new)
+* [Render](https://render.com)
+* [Docker container hosting](https://docs.docker.com/get-started/)
+
+Make sure to provide necessary environment variables such as:
+
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+
+
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/signin
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/signup
+
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
+NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
+
+
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
+DATABASE_URL=
+
+# Direct connection to the database. Used for migrations
+DIRECT_URL=
+
+ARCJET_KEY=
+
+NODE_ENV=
+GEMINI_API_KEY=
+```
+
+---
+
+## 🧑‍💻 Author
+
+Built with ❤️ for modern fullstack apps using Next.js, Clerk, Arcjet and Supabase.
+
+```
