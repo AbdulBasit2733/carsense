@@ -1,6 +1,4 @@
-Here's your **updated `README.md`** for the `carsense` project with Docker instructions and cleaned-up content.
 
----
 
 ````md
 # 🚗 CarSense
